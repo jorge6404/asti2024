@@ -2,12 +2,13 @@
 
 ## Normas de código
 
-- Escribe bien nose bro :)
+- Interesante comentar bien el funcionamiento, el motivo por el que se usa algo...
 
 ## Tareas
 
 - Implementar giro con teleop (usando las teclas a y d)
 - Mejorar sistema de colcon build para que no dé errores
+- Sistema de odometría,
 
 ## Movimiento de motores   (fase beta_v2)
 
