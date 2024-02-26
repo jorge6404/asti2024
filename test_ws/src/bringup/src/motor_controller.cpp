@@ -7,6 +7,11 @@
 //
 //                               * Start node *
 // >> ros2 run bringup motor_controller
+//       if it doesnt work, try:
+//      >> ros2 run bringup motor_controller <device_name>
+//         - Optional argument (default: /dev/ttyUSB0)
+//         - Use ls /dev/ttyUSB* to find the correct device name
+//         - Use sudo chmod 777 /dev/ttyUSB0 to give permissions
 //
 //             * Send SetVelocity messages to /set_velocity topic *
 //                             1 unit = 0.229 rpm
@@ -37,7 +42,7 @@
 
 // Default setting
 #define BAUDRATE 115200 // 57600 Default baudrate
-#define DEVICE_NAME "/dev/ttyUSB1" // ls /dev/ttyUSB* to find the correct device name
+#define DEFAULT_DEVICE_NAME "/dev/ttyUSB0" // ls /dev/ttyUSB* to find the correct device name
 
 dynamixel::PortHandler *portHandler;
 dynamixel::PacketHandler *packetHandler;
@@ -57,7 +62,7 @@ MotorController::MotorController()
    this->get_parameter("qos_depth", qos_depth);
 
    const auto QOS_RKL10V = // Defines QoS
-    rclcpp::QoS(rclcpp::KeepLast(qos_depth)).reliable().durability_volatile();
+   rclcpp::QoS(rclcpp::KeepLast(qos_depth)).reliable().durability_volatile();
 
    // Subscribes to set_velocity topic and defines its callback
    set_velocity_subscriber_ =
@@ -153,7 +158,17 @@ void setupDynamixel(uint8_t dxl_id) {
 }
 
 int main(int argc, char * argv[]) {
-   portHandler = dynamixel::PortHandler::getPortHandler(DEVICE_NAME);
+   const char* deviceName = DEFAULT_DEVICE_NAME;
+
+   if (argc > 1) {
+      deviceName = argv[1];
+   }
+
+   std::cout << "Using device: " << deviceName << std::endl;
+
+    // Rest of your code...
+
+   portHandler = dynamixel::PortHandler::getPortHandler(deviceName);
    packetHandler = dynamixel::PacketHandler::getPacketHandler(PROTOCOL_VERSION);
    
    // Open Serial Port
