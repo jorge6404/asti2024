@@ -4,5 +4,6 @@ build/
 bin/
 install/
 log/
+venv/
 .vscode/
 .vscode/settings.json
