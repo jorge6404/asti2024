@@ -1,6 +1,6 @@
 from setuptools import setup
 
-package_name = 'semifinal_py'
+package_name = 'semifinal'
 
 setup(
     name=package_name,
@@ -20,6 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'laberinto = semifinal.laberinto:main'
         ],
     },
 )
