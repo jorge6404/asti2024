@@ -23,7 +23,7 @@ case $parametro in
     tmux send-keys -t my_session:0.1 'source /opt/ros/foxy/setup.bash' Enter
     tmux send-keys -t my_session:0.1 'source install/setup.bash' Enter
     tmux send-keys -t my_session:0.1 'ros2 topic pub -1 /set_velocity custom_interfaces/SetVelocity "{id: 1, velocity: 500}" ' Enter
- 
+
     # Adjunta la sesión
     tmux attach -t my_session
     ;;
@@ -36,7 +36,7 @@ case $parametro in
   4) 
     echo "$parametro"
     tmux send-keys -t my_session:0.1 'ros2 topic pub -1 /set_velocity custom_interfaces/SetVelocity "{id: 1, velocity: 0}" ' Enter
- 
+
     ;;
   *) 
     echo "Por favor, introduzca un número válido (1,2,3,4)"
