@@ -25,7 +25,7 @@ def main(args=None):
 
     # Publish velocity to id 1 and 2
     minimal_publisher.publish_velocity(1, 20)
-    minimal_publisher.publish_velocity(2, 20)
+    minimal_publisher.publish_velocity(2, -20)
 
     # Wait for 3 seconds
     time.sleep(3)
