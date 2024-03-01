@@ -19,10 +19,12 @@ class MinimalPublisher(Node):
         self.publisher_.publish(msg)
         self.get_logger().info(f'Publishing: velocity="({msg.linear.x}, {msg.angular.z})"')
 
+
 def recto(pub, max_vel, distancia_total):
+    # HECHO
     
     vel_linear = 0.01
-    while(distancia_total > 0):
+    while(distancia_total >= 0):
         if (vel_linear < max_vel):
             vel_linear += 0.005
         pub.publish_velocity((vel_linear, 0.0))
@@ -33,24 +35,27 @@ def recto(pub, max_vel, distancia_total):
     pub.publish_velocity((0.0, 0.0))
 
 
-def atras(pub, max_vel, grados_totales):
+def atras(pub, max_vel, distancia_total):
+    # HECHO
     
-    vel_angular = 0.01
-    while(grados_totales > 0):
-        if (vel_angular < max_vel):
-            vel_angular += 0.01
-        pub.publish_velocity((0.0, vel_angular))
+    vel_linear = 0.01
+    while(distancia_total >= 0):
+        if (vel_linear < max_vel):
+            vel_linear += 0.005
+        pub.publish_velocity((-vel_linear, 0.0))
         time.sleep(0.1)
-        grados_recorridos = vel_angular*0.1
-        grados_totales -= grados_recorridos
+        distancia_recorrida = vel_linear*0.1
+        distancia_total -= distancia_recorrida
 
     pub.publish_velocity((0.0, 0.0))
 
 def derecha(pub, max_vel, degrees):
+    #HECHO
+    
     grados_total = degrees*math.pi/180
     
     vel_angular = 0.01
-    while(grados_total > 0):
+    while(grados_total >= 0):
         if (vel_angular < max_vel):
             vel_angular += 0.01
         pub.publish_velocity((0.0, -vel_angular))
@@ -60,16 +65,19 @@ def derecha(pub, max_vel, degrees):
 
     pub.publish_velocity((0.0, 0.0))
 
-def izquierda(pub, max_vel, grados_total):
+def izquierda(pub, max_vel, degrees):
+    # HECHO
     
-    vel_linear = 0.01
-    while(distancia_total > 0):
-        if (vel_linear < max_vel):
-            vel_linear += 0.01
-        pub.publish_velocity((-vel_linear, 0.0))
+    grados_total = degrees*math.pi/180
+    
+    vel_angular = 0.01
+    while(grados_total >= 0):
+        if (vel_angular < max_vel):
+            vel_angular += 0.01
+        pub.publish_velocity((0.0, vel_angular))
         time.sleep(0.1)
-        distancia_recorrida = vel_linear*0.1
-        distancia_total -= distancia_recorrida
+        grados_recorridos = vel_angular*0.1
+        grados_total -= grados_recorridos
 
     pub.publish_velocity((0.0, 0.0))
 
@@ -80,9 +88,18 @@ def main(args=None):
     executor = SingleThreadedExecutor()
 
     time.sleep(2)
-    recto(minimal_publisher, 0.1, 1)
+    #Laberinto
+    recto(minimal_publisher, 0.1, 1.8)
     derecha(minimal_publisher, 0.1, 90)
-
+    recto(minimal_publisher, 0.1, 0.6)
+    derecha(minimal_publisher, 0.1, 90)
+    recto(minimal_publisher, 0.1, 1.4)
+    izquierda(minimal_publisher, 0.1, 90)
+    recto(minimal_publisher, 0.1, 0.6)
+    izquierda(minimal_publisher, 0.1, 90)
+    recto(minimal_publisher, 0.1, 1.8)
+    
+    # atras(minimal_publisher, 0.1, 1)
 
     executor.add_node(minimal_publisher)
     try:
