@@ -20,7 +20,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'laberinto = semifinal.laberinto:main'
+            'laberinto = semifinal.laberinto:main',
+            'rosBagManual = semifinal.rosBagManual:main'
         ],
     },
 )
