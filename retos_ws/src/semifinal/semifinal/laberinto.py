@@ -8,7 +8,7 @@ class MinimalPublisher(Node):
 
     def __init__(self):
         super().__init__('minimal_publisher')
-        self.publisher_ = self.create_publisher(SetVelocity, 'set_velocity', 10)
+        self.publisher_ = self.create_publisher(SetVelocity, 'pure_velocity', 10) # 'set_velocity'
 
     def publish_velocity(self, id, velocity):
         msg = SetVelocity()
