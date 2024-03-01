@@ -4,6 +4,7 @@ from rclpy.executors import SingleThreadedExecutor
 from custom_interfaces.msg import SetVelocity
 from geometry_msgs.msg import Twist
 import time
+import math
 
 class MinimalPublisher(Node):
 
@@ -23,7 +24,7 @@ def recto(pub, max_vel, distancia_total):
     vel_linear = 0.01
     while(distancia_total > 0):
         if (vel_linear < max_vel):
-            vel_linear += 0.01
+            vel_linear += 0.005
         pub.publish_velocity((vel_linear, 0.0))
         time.sleep(0.1)
         distancia_recorrida = vel_linear*0.1
@@ -45,16 +46,17 @@ def atras(pub, max_vel, grados_totales):
 
     pub.publish_velocity((0.0, 0.0))
 
-def derecha(pub, max_vel, grados_total):
+def derecha(pub, max_vel, degrees):
+    grados_total = degrees*math.pi/180
     
     vel_angular = 0.01
-    while(grados_totales > 0):
+    while(grados_total > 0):
         if (vel_angular < max_vel):
             vel_angular += 0.01
         pub.publish_velocity((0.0, -vel_angular))
         time.sleep(0.1)
         grados_recorridos = vel_angular*0.1
-        grados_totales -= grados_recorridos
+        grados_total -= grados_recorridos
 
     pub.publish_velocity((0.0, 0.0))
 
@@ -78,7 +80,8 @@ def main(args=None):
     executor = SingleThreadedExecutor()
 
     time.sleep(2)
-    recto(minimal_publisher, 0.1, 0.25)
+    recto(minimal_publisher, 0.1, 1)
+    derecha(minimal_publisher, 0.1, 90)
 
 
     executor.add_node(minimal_publisher)
