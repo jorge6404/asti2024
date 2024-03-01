@@ -4,7 +4,10 @@ from time import sleep
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Int32MultiArray
-from custom_interfaces.msg import SetVelocity
+#from custom_interfaces.msg import SetVelocity
+from geometry_msgs.msg import Twist
+
+from semifinal.misfunciones import *
 
 
 class Linea_sub(Node):
@@ -16,16 +19,46 @@ class Linea_sub(Node):
         self.subscription
 
         self.publisher_ = self.create_publisher(
-            SetVelocity,
-            'set_velocity',
+            Twist,
+            'cmd_vel',
             10)
 
-    def listener_callback(self, msg):
-        #self.get_logger().info('I heard: "%s"' % msg.data)
-        print(msg.data[0], msg.data[1])
-        self.get_logger().info(f"Publicando: {msg.data}")
+    def publish_velocity(self, velocity):            # velocity -->  tuple = (1, 0) (linear.x, angular.z)
+        msg = Twist()
+        msg.linear.x = velocity[0]
+        msg.angular.z = velocity[1]
         self.publisher_.publish(msg)
+        self.get_logger().info(f'Publishing: velocity="({msg.linear.x}, {msg.angular.z})"')
 
+    def listener_callback(self, msg):
+        self.get_logger().info('I heard: "%s"' % msg.data)
+        print(msg.data, type(msg.data), msg.data[0], msg.data[1], type(msg.data[0]), type(msg.data[1]))
+        self.get_logger().info(f"Publicando: {msg.data}")
+        #self.publisher_.publish(msg)
+
+        #cmd_vel = Twist()
+        self.movimiento(msg)
+        #self.publisher_.publish(cmd_vel)
+        #self.get_logger().info(f'Publishing: velocity="({msg.linear.x}, {msg.angular.z})"')
+
+    def movimiento(self, msg):
+        distancia = 0.5
+        velocidad = 0.1
+        if msg.data[0] == msg.data[1] != 0:
+            print('Recto')
+            recto(self, velocidad, distancia)
+        elif msg.data[0] > msg.data[1]:
+            print('Derecha')
+            derecha(self, velocidad, distancia)
+        elif msg.data[1] > msg.data[0] > 0:
+            print('Izquierda')
+            izquierda(self, velocidad, distancia)
+        elif msg.data[0] < 0:
+            print('Giro 180º')
+            izquierda(self, velocidad, 2*distancia)
+        elif msg.data[0] == msg.data[1] == 0:
+            print('Detenido')
+            recto(self, 0, 0)
 
 
 def main(args=None):
@@ -35,6 +68,7 @@ def main(args=None):
     rclpy.spin(linea_sub)
     linea_sub.destroy_node()
     rclpy.shutdown()
+
 
 if __name__ == '__main__':
     main()
