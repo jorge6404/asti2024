@@ -18,53 +18,57 @@ class MinimalPublisher(Node):
         self.publisher_.publish(msg)
         self.get_logger().info(f'Publishing: velocity="({msg.linear.x}, {msg.angular.z})"')
 
-def recto(pub, vel, tiempo):
-    # Publish velocity to id 1 and 2
-    pub.publish_velocity(1, -vel)
-    pub.publish_velocity(2, vel)
+def recto(pub, max_vel, distancia_total):
+    
+    vel_linear = 0.01
+    while(distancia_total > 0):
+        if (vel_linear < max_vel):
+            vel_linear += 0.01
+        pub.publish_velocity((vel_linear, 0))
+        time.sleep(0.1)
+        distancia_recorrida = vel_linear*0.1
+        distancia_total -= distancia_recorrida
 
-    # Wait for 'tiempo' seconds
-    time.sleep(tiempo)
+    pub.publish_velocity((0, 0))
 
-    # Publish velocity 0 to id 1 and 2
-    pub.publish_velocity(1, 0)
-    pub.publish_velocity(2, 0)
+def atras(pub, max_vel, distancia_total):
+    
+    vel_linear = 0.1
+    while(distancia_total > 0):
+        if (vel_linear < max_vel):
+            vel_linear += 0.1
+        pub.publish_velocity((-vel_linear, 0))
+        time.sleep(0.1)
+        distancia_recorrida = vel_linear*0.1
+        distancia_total -= distancia_recorrida
 
-def derecha(pub, vel, tiempo):
-    # Publish velocity to id 1 and 2
-    pub.publish_velocity(1, -vel)
-    pub.publish_velocity(2, -vel)
+    pub.publish_velocity((0, 0))
 
-    # Wait for 'tiempo' seconds
-    time.sleep(tiempo)
+def derecha(pub, max_vel, grados_total):
+    
+    vel_angular = 0.1
+    while(grados_total > 0):
+        if (vel_angular < max_vel):
+            vel_angular += 0.1
+        pub.publish_velocity((0, -vel_angular))
+        time.sleep(0.1)
+        grados_recorridos = vel_angular*0.1
+        grados_total -= grados_recorridos
 
-    # Publish velocity 0 to id 1 and 2
-    pub.publish_velocity(1, 0)
-    pub.publish_velocity(2, 0)
+    pub.publish_velocity((0, 0))
 
-def izquierda(pub, vel, tiempo):
-    # Publish velocity to id 1 and 2
-    pub.publish_velocity(1, vel)
-    pub.publish_velocity(2, vel)
+def izquierda(pub, max_vel, grados_total):
+    
+    vel_angular = 0.1
+    while(grados_total > 0):
+        if (vel_angular < max_vel):
+            vel_angular += 0.1
+        pub.publish_velocity((0, vel_angular))
+        time.sleep(0.1)
+        grados_recorridos = vel_angular*0.1
+        grados_total -= grados_recorridos
 
-    # Wait for 'tiempo' seconds
-    time.sleep(tiempo)
-
-    # Publish velocity 0 to id 1 and 2
-    pub.publish_velocity(1, 0)
-    pub.publish_velocity(2, 0)
-
-def atras(pub, vel, tiempo):
-    # Publish velocity to id 1 and 2
-    pub.publish_velocity(1, vel)
-    pub.publish_velocity(2, -vel)
-
-    # Wait for 'tiempo' seconds
-    time.sleep(tiempo)
-
-    # Publish velocity 0 to id 1 and 2
-    pub.publish_velocity(1, 0)
-    pub.publish_velocity(2, 0)
+    pub.publish_velocity((0, 0))
 
 def main(args=None):
     rclpy.init(args=args)
@@ -73,9 +77,7 @@ def main(args=None):
     executor = SingleThreadedExecutor()
 
     time.sleep(2)
-    recto(minimal_publisher, (2, 0), 6)
-    derecha(minimal_publisher, (0, 5), 2)  # 5 rad/s
-    recto(minimal_publisher, (2, 0), 3)
+    recto(minimal_publisher, (2, 0), 5)
 
 
     executor.add_node(minimal_publisher)
