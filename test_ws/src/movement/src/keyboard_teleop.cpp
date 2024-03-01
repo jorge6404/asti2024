@@ -4,16 +4,18 @@
 // This node allows the user to control the rover using their keyboard
 //
 ///////////////////////////////////////////////////////////////////////////////
-
+//Bibliotecas varias...
 #include <chrono>
 #include <cstdio>
 #include <stdio.h>
 #include <unistd.h>
 #include <termios.h>
 
+//Bibliotecas de ROS2...
 #include "rclcpp/rclcpp.hpp"
 #include "custom_interfaces/msg/set_velocity.hpp"
 
+//Para el manejo del tiempo...
 using namespace std::chrono_literals;
 
 /////////////////////////////////////////////////////////////////
