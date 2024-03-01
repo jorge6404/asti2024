@@ -24,51 +24,52 @@ def recto(pub, max_vel, distancia_total):
     while(distancia_total > 0):
         if (vel_linear < max_vel):
             vel_linear += 0.01
-        pub.publish_velocity((vel_linear, 0))
+        pub.publish_velocity((vel_linear, 0.0))
         time.sleep(0.1)
         distancia_recorrida = vel_linear*0.1
         distancia_total -= distancia_recorrida
 
-    pub.publish_velocity((0, 0))
+    pub.publish_velocity((0.0, 0.0))
 
-def atras(pub, max_vel, distancia_total):
+
+def atras(pub, max_vel, grados_totales):
     
-    vel_linear = 0.1
-    while(distancia_total > 0):
-        if (vel_linear < max_vel):
-            vel_linear += 0.1
-        pub.publish_velocity((-vel_linear, 0))
+    vel_angular = 0.01
+    while(grados_totales > 0):
+        if (vel_angular < max_vel):
+            vel_angular += 0.01
+        pub.publish_velocity((0.0, vel_angular))
         time.sleep(0.1)
-        distancia_recorrida = vel_linear*0.1
-        distancia_total -= distancia_recorrida
+        grados_recorridos = vel_angular*0.1
+        grados_totales -= grados_recorridos
 
-    pub.publish_velocity((0, 0))
+    pub.publish_velocity((0.0, 0.0))
 
 def derecha(pub, max_vel, grados_total):
     
-    vel_angular = 0.1
-    while(grados_total > 0):
+    vel_angular = 0.01
+    while(grados_totales > 0):
         if (vel_angular < max_vel):
-            vel_angular += 0.1
-        pub.publish_velocity((0, -vel_angular))
+            vel_angular += 0.01
+        pub.publish_velocity((0.0, -vel_angular))
         time.sleep(0.1)
         grados_recorridos = vel_angular*0.1
-        grados_total -= grados_recorridos
+        grados_totales -= grados_recorridos
 
-    pub.publish_velocity((0, 0))
+    pub.publish_velocity((0.0, 0.0))
 
 def izquierda(pub, max_vel, grados_total):
     
-    vel_angular = 0.1
-    while(grados_total > 0):
-        if (vel_angular < max_vel):
-            vel_angular += 0.1
-        pub.publish_velocity((0, vel_angular))
+    vel_linear = 0.01
+    while(distancia_total > 0):
+        if (vel_linear < max_vel):
+            vel_linear += 0.01
+        pub.publish_velocity((-vel_linear, 0.0))
         time.sleep(0.1)
-        grados_recorridos = vel_angular*0.1
-        grados_total -= grados_recorridos
+        distancia_recorrida = vel_linear*0.1
+        distancia_total -= distancia_recorrida
 
-    pub.publish_velocity((0, 0))
+    pub.publish_velocity((0.0, 0.0))
 
 def main(args=None):
     rclpy.init(args=args)
@@ -77,7 +78,7 @@ def main(args=None):
     executor = SingleThreadedExecutor()
 
     time.sleep(2)
-    recto(minimal_publisher, (2, 0), 5)
+    recto(minimal_publisher, 0.1, 0.25)
 
 
     executor.add_node(minimal_publisher)
