@@ -2,20 +2,21 @@ import rclpy
 from rclpy.node import Node
 from rclpy.executors import SingleThreadedExecutor
 from custom_interfaces.msg import SetVelocity
+from geometry_msgs.msg import Twist
 import time
 
 class MinimalPublisher(Node):
 
     def __init__(self):
         super().__init__('minimal_publisher')
-        self.publisher_ = self.create_publisher(SetVelocity, 'pure_velocity', 10) # 'set_velocity'
+        self.publisher_ = self.create_publisher(Twist, 'cmd_vel', 10)   # cmd_vel has (m/s , rad/s)
 
-    def publish_velocity(self, id, velocity):
-        msg = SetVelocity()
-        msg.id = id
-        msg.velocity = velocity
+    def publish_velocity(self, velocity):            # velocity -->  tuple = (1, 0) (linear.x, angular.z)
+        msg = Twist()
+        msg.linear.x = velocity[0]
+        msg.angular.z = velocity[1]
         self.publisher_.publish(msg)
-        self.get_logger().info(f'Publishing: id="{msg.id}", velocity="{msg.velocity}"')
+        self.get_logger().info(f'Publishing: velocity="({msg.linear.x}, {msg.angular.z})"')
 
 def recto(pub, vel, tiempo):
     # Publish velocity to id 1 and 2
@@ -72,9 +73,9 @@ def main(args=None):
     executor = SingleThreadedExecutor()
 
     time.sleep(2)
-    recto(minimal_publisher, 200, 4)
-    derecha(minimal_publisher, 180, 2)
-    recto(minimal_publisher, 200, 4)
+    recto(minimal_publisher, (2, 0), 6)
+    derecha(minimal_publisher, (0, 5), 2)  # 5 rad/s
+    recto(minimal_publisher, (2, 0), 3)
 
 
     executor.add_node(minimal_publisher)
