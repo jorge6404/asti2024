@@ -34,7 +34,6 @@ def recto(pub, max_vel, distancia_total, acc_lin=0.005):
     while(distancia_total >= 0):
         if (vel_linear < max_vel):
             vel_linear += acc_lin
-            vel_linear += 0.005
         pub.publish_velocity((vel_linear, 0.0))
         time.sleep(0.1)
         distancia_recorrida = vel_linear*0.1
@@ -49,7 +48,6 @@ def atras(pub, max_vel, distancia_total, acc_lin=0.005):
     while(distancia_total >= 0):
         if (vel_linear < max_vel):
             vel_linear += acc_lin
-            vel_linear += 0.005
         pub.publish_velocity((-vel_linear, 0.0))
         time.sleep(0.1)
         distancia_recorrida = vel_linear*0.1
@@ -66,7 +64,6 @@ def derecha(pub, max_vel, degrees, acc_ang=0.01):
     while(grados_total >= 0):
         if (vel_angular < max_vel):
             vel_angular += acc_ang
-            vel_angular += 0.01
         pub.publish_velocity((0.0, -vel_angular))
         time.sleep(0.1)
         grados_recorridos = vel_angular*0.1
@@ -83,7 +80,6 @@ def izquierda(pub, max_vel, degrees, acc_ang=0.01):
     while(grados_total >= 0):
         if (vel_angular < max_vel):
             vel_angular += acc_ang
-            vel_angular += 0.01
         pub.publish_velocity((0.0, vel_angular))
         time.sleep(0.1)
         grados_recorridos = vel_angular*0.1
@@ -92,5 +88,32 @@ def izquierda(pub, max_vel, degrees, acc_ang=0.01):
     pub.publish_velocity((0.0, 0.0))
 
 
+# -------- FUNCIONES ROTACION CON RADIO ----------------
 
-# -------- 
+def avanzar_derecha(pub, vel):
+    # Asumimos giro 180 grados
+    # TODO: haciendo
+    grados_total = math.pi
+    
+    while(grados_total >= 0):
+        radio = 0.5
+        pub.publish_velocity((radio, -vel))
+        time.sleep(0.1)
+        grados_recorridos = vel*0.1
+        grados_total -= grados_recorridos
+
+    pub.publish_velocity((0.0, 0.0))
+    
+def avanzar_izquierda(pub, vel):
+    # Asumimos giro 180 grados
+    # TODO: haciendo
+    grados_total = math.pi
+    
+    while(grados_total >= 0):
+        radio = 1.0
+        pub.publish_velocity((radio, vel))
+        time.sleep(0.1)
+        grados_recorridos = vel*0.1
+        grados_total -= grados_recorridos
+
+    pub.publish_velocity((0.0, 0.0))

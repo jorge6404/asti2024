@@ -45,19 +45,29 @@ def main(args=None):
     acc_lin = args.al       # Positiva siempre
     acc_ang = args.aa
     
+    # LABERINTO BÁSICO
     
-    recto(minimal_publisher, vel_lin, distancia_total=1.8, acc_lin=acc_lin)
-    derecha(minimal_publisher, vel_ang, degrees= 90, acc_ang=acc_ang)
-    recto(minimal_publisher, vel_lin, distancia_total=0.6, acc_lin=acc_lin)
-    derecha(minimal_publisher, vel_ang, degrees=90, acc_ang=acc_ang)
-    recto(minimal_publisher, vel_lin, distancia_total=1.4, acc_lin=acc_lin)
-    izquierda(minimal_publisher, vel_ang, degrees=90, acc_ang=acc_ang)
-    recto(minimal_publisher, vel_lin, distancia_total=0.6, acc_lin=acc_lin)
-    izquierda(minimal_publisher, vel_ang, degrees=90, acc_ang=acc_ang)
-    recto(minimal_publisher, vel_lin, distancia_total=1.8, acc_lin=acc_lin)
+    # recto(minimal_publisher, vel_lin, distancia_total=1.8, acc_lin=acc_lin)
+    # derecha(minimal_publisher, vel_ang, degrees= 90, acc_ang=acc_ang)
+    # recto(minimal_publisher, vel_lin, distancia_total=0.6, acc_lin=acc_lin)
+    # derecha(minimal_publisher, vel_ang, degrees=90, acc_ang=acc_ang)
+    # recto(minimal_publisher, vel_lin, distancia_total=1.4, acc_lin=acc_lin)
+    # izquierda(minimal_publisher, vel_ang, degrees=90, acc_ang=acc_ang)
+    # recto(minimal_publisher, vel_lin, distancia_total=0.6, acc_lin=acc_lin)
+    # izquierda(minimal_publisher, vel_ang, degrees=90, acc_ang=acc_ang)
+    # recto(minimal_publisher, vel_lin, distancia_total=1.8, acc_lin=acc_lin)
     
-    # atras(minimal_publisher, 0.1, 1)
-
+    
+    # LABERINTO PRO
+    
+    recto(minimal_publisher, vel_lin, distancia_total=1.0, acc_lin=acc_lin)     # Todo: Bajar distancia total para que el robot empiece a girar antes
+    avanzar_derecha(minimal_publisher, vel_ang)
+    recto(minimal_publisher, vel_lin, distancia_total=1.0, acc_lin=acc_lin)
+    avanzar_izquierda(minimal_publisher, vel_ang)
+    recto(minimal_publisher, vel_lin, distancia_total=1.0, acc_lin=acc_lin)
+    
+    
+    
     executor.add_node(minimal_publisher)
     try:
         executor.spin()
