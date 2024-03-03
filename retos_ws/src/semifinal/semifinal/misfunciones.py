@@ -6,6 +6,26 @@ import time
 import math
 
 
+# -------- FUNCIONES AUXILIARES ----------------
+
+def avanzar(pub, vel=0.3):
+    pub.publish_velocity((vel, 0.0))
+
+def retroceder(pub, vel=0.3):
+    pub.publish_velocity((-vel, 0.0))
+    
+def detener(pub):
+    pub.publish_velocity((0.0, 0.0))
+
+def girar_izquierda(pub, vel=0.3):
+    pub.publish_velocity((0.0, vel))
+    
+def girar_derecha(pub, vel=0.3):
+    pub.publish_velocity((0.0, -vel))
+
+
+# -------- FUNCIONES POR DISTANCIA ----------------
+
 def recto(pub, max_vel, distancia_total, acc_lin=0.005):
     # HECHO
     # TODO: Asegurarse que si la aceleracion es muy grande, no se pase de la velocidad maxima
@@ -21,7 +41,6 @@ def recto(pub, max_vel, distancia_total, acc_lin=0.005):
         distancia_total -= distancia_recorrida
 
     pub.publish_velocity((0.0, 0.0))
-
 
 def atras(pub, max_vel, distancia_total, acc_lin=0.005):
     # HECHO
