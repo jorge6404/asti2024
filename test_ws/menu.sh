@@ -18,8 +18,14 @@ case $parametro in
     tmux send-keys -t my_session:0.0 'ros2 run bringup motor_controller' Enter
 	
     # Envia las teclas al segundo panel
-    tmux send-keys -t my_session:0.1 'cd ../retos_ws' Enter
-    tmux send-keys -t my_session:0.1 'ros2 run semifnal labebrinto' Enter
+    tmux send-keys -t my_session:0.1 'ros2 run movement vel_controller' Enter
+    
+    # Divide la subventana en mas subventanas
+    tmux split-window
+    
+    # Envia las teclas al segundo panel
+    tmux send-keys -t my_session:0.2 'cd ../retos_ws' Enter
+    tmux send-keys -t my_session:0.2 'ros2 run semifnal laberinto' Enter
 
     # Adjunta la sesión
     tmux attach -t my_session

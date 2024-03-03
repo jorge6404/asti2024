@@ -25,8 +25,14 @@ private:
         input_linear_vel_ = msg->linear.x;
         input_angular_vel_ = msg->angular.z;
 
-        output_vel_right = (input_angular_vel_*(input_linear_vel_+0.086))*unit_distance;
-        output_vel_left = ((input_angular_vel_*(input_linear_vel_-0.086)))*unit_distance;
+        if (input_angular_vel_ == 0){
+            output_vel_right = input_linear_vel_*unit_distance;
+            output_vel_left = input_linear_vel_*unit_distance;
+        }
+        else{
+            output_vel_right = (input_angular_vel_*(input_linear_vel_+0.086))*unit_distance;
+            output_vel_left = ((input_angular_vel_*(input_linear_vel_-0.086)))*unit_distance;
+        }
 
         msg_.id = 1;
         msg_.velocity = output_vel_right;
