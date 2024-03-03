@@ -17,10 +17,10 @@ def retroceder(pub, vel=0.3):
 def detener(pub):
     pub.publish_velocity((0.0, 0.0))
 
-def girar_izquierda(pub, vel=2):
+def girar_izquierda(pub, vel=2.0):
     pub.publish_velocity((0.0, vel))
     
-def girar_derecha(pub, vel=2):
+def girar_derecha(pub, vel=2.0):
     pub.publish_velocity((0.0, -vel))
 
 
