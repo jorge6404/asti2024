@@ -1,4 +1,3 @@
-@@ -1,132 +0,0 @@
 import cv2
 import numpy as np
 from time import sleep
@@ -18,7 +17,7 @@ class LineaPublisher(Node):
         self.tupla = (0, 0)
         self.matrix = np.zeros((3, 3), dtype=int)
         self.black_threshold = 50
-        self.vid = cv2.VideoCapture(2)
+        self.vid = cv2.VideoCapture(0)
 
         self.estacionado = True
         self.giro = "izq"

@@ -105,12 +105,29 @@ class LineaPublisher(Node):
                         self.tupla = (0, 0)
                         self.counter = 300
 
-        # Print tuple and control signals
+            vel_lineal = 0.3
+            vel_ang = 2.0
+            distancia = 0.5
+            # Print tuple and control signals
+            if self.tupla[0] == self.tupla[1] != 0:
+                print('Recto')
+                recto(self, vel_lineal, distancia)
+            elif self.tupla[0] > self.tupla[1]:
+                print('Derecha')
+                derecha(self, vel_ang, distancia)
+            elif self.tupla[1] > self.tupla[0] > 0:
+                print('Izquierda')
+                izquierda(self, vel_ang, distancia)
+            elif self.tupla[0] < 0:
+                print('Giro 180º')
+            elif self.tupla[0] == self.tupla[1] == 0 and self.estacionado:
+                print('Detenido')
+                recto(self, 0.0, distancia)
 
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            self.vid.release()
-            cv2.destroyAllWindows()
-            rclpy.shutdown()
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                self.vid.release()
+                cv2.destroyAllWindows()
+                rclpy.shutdown()
 
 
 def main(args=None):
@@ -120,37 +137,7 @@ def main(args=None):
     linea_pub.destroy_node()
     rclpy.shutdown()
 
-            
-    # Publish tuple data - las funciones recto, derecha... llaman a 
-    # publish_velocity, que publicará el mensaje
-
-    distancia = 0.5
-    velocidad = 0.1
-    if linea_pub.tupla[0] == linea_pub.tupla[1] != 0:
-        print('Recto')
-        recto(linea_pub, velocidad, distancia)
-    elif linea_pub.tupla[0] > linea_pub.tupla[1]:
-        print('Derecha')
-        derecha(linea_pub, velocidad, distancia)
-    elif linea_pub.tupla[1] > linea_pub.tupla[0] > 0:
-        print('Izquierda')
-        izquierda(linea_pub, velocidad, distancia)
-    elif linea_pub.tupla[0] < 0:
-        print('Giro 180º')
-        izquierda(linea_pub, velocidad, 2*distancia)
-    elif linea_pub.tupla[0] == linea_pub.tupla[1] == 0:
-        print('Detenido')
-        recto(linea_pub, 0.0, 0.0)
-
-    executor.add_node(linea_pub)
-    try:
-        executor.spin()
-    except KeyboardInterrupt:
-        pass
-
-    linea_pub.destroy_node()
-    rclpy.shutdown()
-
 
 if __name__ == '__main__':
     main()
+
