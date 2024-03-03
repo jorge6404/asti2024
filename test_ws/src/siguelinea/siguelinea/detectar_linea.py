@@ -127,17 +127,17 @@ class DetectLinea(Node):
                 for i in range(7)
             ]
 
-            puntos = []
+            puntos = [[0]*7 for _ in range(7)]
 
             for i in range(7):
                 for j in range(7):
                     if np.any(cuadricula49[i][j] > 0):
-                        #print(((j * 2 + 1) * wImg // 14, (i * 2 + 1) * hImg // 14))
+                        # print(((j * 2 + 1) * wImg // 14, (i * 2 + 1) * hImg // 14))
                         cv2.circle(img, ((j * 2 + 1) * wImg // 14, (i * 2 + 1) * hImg // 14), 5, (50, 50, 255), 2)
-                        puntos.append(np.array([(j * 2 + 1) * wImg // 14, (i * 2 + 1) * hImg // 14]))
+                        puntos[i][j] = 1
 
-            suma_columna_central, diferencia_posiciones = self.calcular_diferencia_puntos(puntos, len(puntos[0]))
-            print(suma_columna_central, diferencia_posiciones)
+            suma_central, diferencia = self.calcular_diferencia_puntos(puntos)
+            print(suma_central, diferencia, suma_central + diferencia)
             #self.publish((suma_columna_central, diferencia_posiciones))
 
             cv2.imshow("Result", resultado)
@@ -146,47 +146,18 @@ class DetectLinea(Node):
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
-    def calcular_diferencia_puntos(self, puntos, num_columnas):
-        # Inicializar la variable para almacenar la suma de puntos activos en la columna central
-        suma_columna_central = 0
-
-        # Inicializar listas para almacenar las posiciones de puntos activados en los lados derecho e izquierdo
-        posiciones_derecha = []
-        posiciones_izquierda = []
-
-        # Iterar sobre los puntos detectados
-        for punto in puntos:
-            x, y = punto
-            # Verificar si el punto está en la columna central
-            if x == num_columnas // 2:
-                suma_columna_central += 1
-            # Verificar si el punto está en el lado derecho
-            elif x > num_columnas // 2:
-                posiciones_derecha.append((x, y))
-            # Verificar si el punto está en el lado izquierdo
-            else:
-                posiciones_izquierda.append((x, y))
-
-        # Calcular la posición promedio de los puntos en los lados derecho e izquierdo
-        promedio_derecha = (
-                    sum(x[0] for x in posiciones_derecha) // len(posiciones_derecha)) if posiciones_derecha else 0
-        promedio_izquierda = (
-                    sum(x[0] for x in posiciones_izquierda) // len(posiciones_izquierda)) if posiciones_izquierda else 0
-
-        # Calcular la diferencia entre las posiciones promedio de los puntos en los lados derecho e izquierdo
-        diferencia_posiciones = promedio_derecha - promedio_izquierda
-
-        return suma_columna_central, diferencia_posiciones - 300
-
-    def detectar_puntos_activos(self, resultado, hImg, wImg):
-        puntos = []
+    def detectar_puntos_activos(self, resultado, hImg, wImg, puntos):
         for i in range(7):
             for j in range(7):
                 if np.any(resultado[i * hImg // 7:(i + 1) * hImg // 7, j * wImg // 7:(j + 1) * wImg // 7] > 0):
-                    fila = i * 2 + 1
-                    columna = j * 2 + 1
-                    puntos.append((fila, columna))
-        return puntos
+                    puntos[i][j] = 1
+
+    def calcular_diferencia_puntos(self, puntos):
+        suma_columna_central = sum(puntos[i][3] for i in range(7))
+        suma_derecha = sum(sum(puntos[i][4:]) for i in range(7))
+        suma_izquierda = sum(sum(puntos[i][:3]) for i in range(7))
+        diferencia_posiciones = suma_derecha - suma_izquierda
+        return suma_columna_central, diferencia_posiciones
 
 
 def main(args=None):
