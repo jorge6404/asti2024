@@ -21,7 +21,8 @@ setup(
     entry_points={
         'console_scripts': [
             'laberinto = semifinal.laberinto:main',
-            'rosBagManual = semifinal.rosBagManual:main'
+            'rosBagManual = semifinal.rosBagManual:main',
+            'siguelineas = semifinal.siguelineas_guillem:main'
         ],
     },
 )

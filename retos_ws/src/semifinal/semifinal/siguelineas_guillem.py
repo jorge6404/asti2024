@@ -1,29 +1,37 @@
-@@ -1,132 +0,0 @@
 import cv2
 import numpy as np
 from time import sleep
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import Int32MultiArray, Int16
+from geometry_msgs.msg import Twist
+from rclpy.executors import SingleThreadedExecutor
+from semifinal.misfunciones import *
 
 
 class LineaPublisher(Node):
 
     def __init__(self):
         super().__init__('linea_publisher')
-        self.publisher_ = self.create_publisher(Int32MultiArray, 'linea', 10)
+        self.publisher_ = self.create_publisher(Twist, 'cmd_vel', 10)
         timer_period = 0.1  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
         self.tupla = (0, 0)
         self.matrix = np.zeros((3, 3), dtype=int)
         self.black_threshold = 50
-        self.vid = cv2.VideoCapture(2)
+        self.vid = cv2.VideoCapture(0)
 
         self.estacionado = True
         self.giro = "izq"
         self.counter = 300
 
+    def publish_velocity(self, velocity):            # velocity -->  tuple = (1, 0) (linear.x, angular.z)
+        msg = Twist()
+        msg.linear.x = velocity[0]
+        msg.angular.z = velocity[1]
+        self.publisher_.publish(msg)
+        self.get_logger().info(f'Publishing: velocity="({msg.linear.x}, {msg.angular.z})"')
+    
     def timer_callback(self):
 
         self.run()
@@ -97,34 +105,49 @@ class LineaPublisher(Node):
                         self.tupla = (0, 0)
                         self.counter = 300
 
-            # Print tuple and control signals
-            if self.tupla[0] == self.tupla[1] != 0:
-                print('Recto')
-            elif self.tupla[0] > self.tupla[1]:
-                print('Derecha')
-            elif self.tupla[1] > self.tupla[0] > 0:
-                print('Izquierda')
-            elif self.tupla[0] < 0:
-                print('Giro 180º')
-            elif self.tupla[0] == self.tupla[1] == 0 and self.estacionado:
-                print('Detenido')
+        # Print tuple and control signals
 
-            # Publish tuple data
-            msg = Int32MultiArray()
-            msg.data = list(self.tupla)
-            self.publisher_.publish(msg)
-            self.get_logger().info(f"Publicando: {msg.data}")
-
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                self.vid.release()
-                cv2.destroyAllWindows()
-                rclpy.shutdown()
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            self.vid.release()
+            cv2.destroyAllWindows()
+            rclpy.shutdown()
 
 
 def main(args=None):
     rclpy.init(args=args)
     linea_pub = LineaPublisher()
     rclpy.spin(linea_pub)
+    linea_pub.destroy_node()
+    rclpy.shutdown()
+
+            
+    # Publish tuple data - las funciones recto, derecha... llaman a 
+    # publish_velocity, que publicará el mensaje
+
+    distancia = 0.5
+    velocidad = 0.1
+    if linea_pub.tupla[0] == linea_pub.tupla[1] != 0:
+        print('Recto')
+        recto(linea_pub, velocidad, distancia)
+    elif linea_pub.tupla[0] > linea_pub.tupla[1]:
+        print('Derecha')
+        derecha(linea_pub, velocidad, distancia)
+    elif linea_pub.tupla[1] > linea_pub.tupla[0] > 0:
+        print('Izquierda')
+        izquierda(linea_pub, velocidad, distancia)
+    elif linea_pub.tupla[0] < 0:
+        print('Giro 180º')
+        izquierda(linea_pub, velocidad, 2*distancia)
+    elif linea_pub.tupla[0] == linea_pub.tupla[1] == 0:
+        print('Detenido')
+        recto(linea_pub, 0.0, 0.0)
+
+    executor.add_node(linea_pub)
+    try:
+        executor.spin()
+    except KeyboardInterrupt:
+        pass
+
     linea_pub.destroy_node()
     rclpy.shutdown()
 
