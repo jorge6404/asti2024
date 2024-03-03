@@ -6,6 +6,7 @@ from geometry_msgs.msg import Twist
 import time
 import math
 from semifinal.misfunciones import *
+import argparse
 
 class MinimalPublisher(Node):
 
@@ -21,22 +22,38 @@ class MinimalPublisher(Node):
         self.get_logger().info(f'Publishing: velocity="({msg.linear.x}, {msg.angular.z})"')
 
 def main(args=None):
-    rclpy.init(args=args)
+    # Argumentos opcionales
+    
+    parser = argparse.ArgumentParser(description='Publish velocities to a ROS2 topic.')
+    parser.add_argument('-vl', type=float, default=0.3, help='The linear to publish.')
+    parser.add_argument('-va', type=float, default=0.3, help='The angular to publish.')
+    parser.add_argument('-al', type=float, default=0.005, help='Linear acceleration.')
+    parser.add_argument('-aa', type=float, default=0.01 , help='Angular acceleration.')
+    args = parser.parse_args()
+
+    rclpy.init()
+    print('Los argumentos son:', args)
 
     minimal_publisher = MinimalPublisher()
     executor = SingleThreadedExecutor()
 
     time.sleep(2)
     #Laberinto
-    recto(minimal_publisher, 0.1, 1.8)
-    derecha(minimal_publisher, 0.1, 90)
-    recto(minimal_publisher, 0.1, 0.6)
-    derecha(minimal_publisher, 0.1, 90)
-    recto(minimal_publisher, 0.1, 1.4)
-    izquierda(minimal_publisher, 0.1, 90)
-    recto(minimal_publisher, 0.1, 0.6)
-    izquierda(minimal_publisher, 0.1, 90)
-    recto(minimal_publisher, 0.1, 1.8)
+    vel_lin = args.vl           # Max vel
+    vel_ang = args.va
+    
+    acc_lin = args.al       # Positiva siempre
+    acc_ang = args.aa
+    
+    recto(minimal_publisher, vel_lin, distancia_total=1.8, acc_lin=acc_lin)
+    derecha(minimal_publisher, vel_ang, degrees= 90, acc_ang=acc_ang)
+    recto(minimal_publisher, vel_lin, distancia_total=0.6, acc_lin=acc_lin)
+    derecha(minimal_publisher, vel_ang, degrees=90, acc_ang=acc_ang)
+    recto(minimal_publisher, vel_lin, distancia_total=1.4, acc_lin=acc_lin)
+    izquierda(minimal_publisher, vel_ang, degrees=90, acc_ang=acc_ang)
+    recto(minimal_publisher, vel_lin, distancia_total=0.6, acc_lin=acc_lin)
+    izquierda(minimal_publisher, vel_ang, degrees=90, acc_ang=acc_ang)
+    recto(minimal_publisher, vel_lin, distancia_total=1.8, acc_lin=acc_lin)
     
     # atras(minimal_publisher, 0.1, 1)
 
