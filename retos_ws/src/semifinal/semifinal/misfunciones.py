@@ -17,10 +17,10 @@ def retroceder(pub, vel=0.3):
 def detener(pub):
     pub.publish_velocity((0.0, 0.0))
 
-def girar_izquierda(pub, vel=0.3):
+def girar_izquierda(pub, vel=2):
     pub.publish_velocity((0.0, vel))
     
-def girar_derecha(pub, vel=0.3):
+def girar_derecha(pub, vel=2):
     pub.publish_velocity((0.0, -vel))
 
 
@@ -90,3 +90,7 @@ def izquierda(pub, max_vel, degrees, acc_ang=0.01):
         grados_total -= grados_recorridos
 
     pub.publish_velocity((0.0, 0.0))
+
+
+
+# -------- 

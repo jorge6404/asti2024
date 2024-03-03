@@ -26,9 +26,9 @@ def main(args=None):
     
     parser = argparse.ArgumentParser(description='Publish velocities to a ROS2 topic.')
     parser.add_argument('-vl', type=float, default=0.3, help='The linear to publish.')
-    parser.add_argument('-va', type=float, default=0.3, help='The angular to publish.')
-    parser.add_argument('-al', type=float, default=0.005, help='Linear acceleration.')
-    parser.add_argument('-aa', type=float, default=0.01 , help='Angular acceleration.')
+    parser.add_argument('-va', type=float, default=2.0, help='The angular to publish.')
+    parser.add_argument('-al', type=float, default=0.01, help='Linear acceleration.')
+    parser.add_argument('-aa', type=float, default=0.1 , help='Angular acceleration.')
     args = parser.parse_args()
 
     rclpy.init()
@@ -44,6 +44,7 @@ def main(args=None):
     
     acc_lin = args.al       # Positiva siempre
     acc_ang = args.aa
+    
     
     recto(minimal_publisher, vel_lin, distancia_total=1.8, acc_lin=acc_lin)
     derecha(minimal_publisher, vel_ang, degrees= 90, acc_ang=acc_ang)
