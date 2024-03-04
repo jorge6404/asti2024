@@ -28,6 +28,11 @@
 
 - cd asti2024/test_ws
 
+(Si están las carpetas build, install y log hay que borrarlas)
+- rm -r build
+- rm -r install
+- rm -r log
+
 - colcon build --packages-select custom_interfaces
 - colcon build --packages-select dynamixel_sdk
 - source install/setup.bash
@@ -36,6 +41,11 @@
 
 
 - cd ../retos_ws
+
+(Si están las carpetas build, install y log hay que borrarlas)
+- rm -r build
+- rm -r install
+- rm -r log
 
 - colcon build --packages-select custom_interfaces
 - source install/setup.bash
