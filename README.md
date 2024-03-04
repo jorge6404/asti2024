@@ -1,57 +1,69 @@
 # UJI ROBOTICS - ASTI2024
 
-## Normas de código
-
-- Interesante comentar bien el funcionamiento, el motivo por el que se usa algo...
-
-## Tareas
-
-- Implementar giro con teleop (usando las teclas a y d)
-- Mejorar sistema de colcon build para que no dé errores
-- Sistema de odometría, [PDF explicativo](test_ws/src/icckinematics.pdf)
-
-## Movimiento de motores   (fase beta_v2)
-
-- Situarse en carpeta test_ws
-- Colcon builds (importante hacer orden correcto... esperando script automatizado)
-   - colcon build --symlink-install --packages-select bringup custom_interfaces dynamixel_sdk movement
-- Source install/setup.bash en cada terminal
-- Terminal 1:
-  - ros2 run bringup motor_controller
-- Terminal 2:
-  - ros2 run movement keyboard_teleop
-    - Opción para controlar con el teclado: wasd)
-  - ros2 topic pub -1 /set_velocity custom_interfaces/SetVelocity "{id: 1, velocity: 500}"
-    - Donde id es 1 o 2, y velocity puede ser + o -
-
 ## Compilación
 
-- cd asti2024/test_ws
+MOTORES
 
-(Si están las carpetas build, install y log hay que borrarlas)
-- rm -r build
-- rm -r install
-- rm -r log
+`cd asti2024/test_ws`
 
-- colcon build --packages-select custom_interfaces
-- colcon build --packages-select dynamixel_sdk
-- source install/setup.bash
-- colcon build --symlink-install --packages-select bringup movement
-- source install/setup.bash
+(Si están las carpetas build, install y log hay que borrarlas)  
+`rm -r build`  
+`rm -r install`  
+`rm -r log`
+
+`colcon build --packages-select custom_interfaces`  
+`colcon build --packages-select dynamixel_sdk`  
+`source install/setup.bash`  
+`colcon build --symlink-install --packages-select bringup movement`  
+`source install/setup.bash`
+
+PRUEBAS
+
+`cd ../retos_ws`
+
+(Si están las carpetas build, install y log hay que borrarlas)  
+`rm -r build`  
+`rm -r install`  
+`rm -r log`  
+
+`colcon build --packages-select custom_interfaces`  
+`source install/setup.bash`  
+`colcon build --symlink-install --packages-select semifinal`  
+`source install/setup.bash`
+
+## Ejecución
+
+MOTORES
+
+Terminal 1 (Donde se ha compilado todo):  
+`ros2 run bringup motor_controller`
+
+En caso de fallo:  
+`sudo usermod -aG dialout <linux_account>`  
+`sudo chmod 777 /dev/ttyUSB0`  
+`ros2 run bringup motor_controller /dev/ttyUSB0`   (usar `ls /dev/ttyUSB*` para verlo)  
+Reiniciar la controladora de motores.  
+Cambiar el usb de sitio.
 
 
-- cd ../retos_ws
-
-(Si están las carpetas build, install y log hay que borrarlas)
-- rm -r build
-- rm -r install
-- rm -r log
-
-- colcon build --packages-select custom_interfaces
-- source install/setup.bash
-- colcon build --symlink-install --packages-select semifinal
-- source install/setup.bash
-
-Y ya está todo listo mi rey, ya puedes ejecutar los programas como "ros2 run semifinal siguelineas"
+Terminal 2:   
+`source /opt/ros/foxy/setup.bash`  
+`source install/setup.bash`  
+`ros2 run movement vel_controller`  
+(El traductor a velocidad lineal y angular)
 
 
+Terminal 3:  (Ejecutar)  
+`source /opt/ros/foxy/setup.bash`  
+`source install/setup.bash`  
+`ros2 run semifinal siguelineas`  (o laberinto)
+
+
+### Otros
+
+`ros2 topic pub cmd_vel geometry_msgs/Twist "{linear: {x: 0.1, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}"`
+
+`ros2 topic pub -1 /set_velocity custom_interfaces/SetVelocity "{id: 1, velocity: 50}"`  
+(Id puede ser 1 o 2, y velocity puede ser + o -)
+
+`ros2 run movement keyboard_teleop`
