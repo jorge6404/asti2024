@@ -14,7 +14,7 @@ class DetectLinea(Node):
         timer_period = 0.1  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
-        self.cap = cv2.VideoCapture(2)
+        self.cap = cv2.VideoCapture(0)
         self.cap.set(3, 640)
         self.cap.set(4, 480)
 
@@ -35,7 +35,7 @@ class DetectLinea(Node):
             cv2.circle(img, (320, 480), 5, (50, 50, 255), 2)
             hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
             lower_blue = np.array([0, 0, 0])
-            upper_blue = np.array([50, 50, 50])
+            upper_blue = np.array([80, 80, 80])
 
             mask = cv2.inRange(hsv, lower_blue, upper_blue)
             resultado = cv2.bitwise_and(img, img, mask=mask)
@@ -54,7 +54,7 @@ class DetectLinea(Node):
 
             #self.publish((suma_columna_central, diferencia_posiciones))
             ####
-            cv2.imshow("Result", resultado)
+            # cv2.imshow("Result", resultado)
             cv2.imshow("Video", img)
             ###
 
