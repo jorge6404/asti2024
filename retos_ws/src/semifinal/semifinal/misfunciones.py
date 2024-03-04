@@ -91,29 +91,36 @@ def izquierda(pub, max_vel, degrees, acc_ang=0.01):
 # -------- FUNCIONES ROTACION CON RADIO ----------------
 
 def avanzar_derecha(pub, vel):
-    # Asumimos giro 180 grados
-    # TODO: haciendo
-    grados_total = math.pi
+    # TODO: Comprobar el robot físico
     
-    while(grados_total >= 0):
-        radio = 0.5
+    radio = 0.25
+    max_vel = math.pi/3
+    radian_total = math.pi      # 180 grados
+    acc = 0.01
+    
+    while(radian_total >= 0):
+        if (vel < max_vel):
+            vel += acc
+            
         pub.publish_velocity((radio, -vel))
         time.sleep(0.1)
-        grados_recorridos = vel*0.1
-        grados_total -= grados_recorridos
+        radian_recorridos = vel*0.1             # pi/3 * 0.1 = pi/30
+        radian_total -= radian_recorridos
 
     pub.publish_velocity((0.0, 0.0))
     
 def avanzar_izquierda(pub, vel):
-    # Asumimos giro 180 grados
-    # TODO: haciendo
-    grados_total = math.pi
+    # TODO: Comprobar el robot físico
+    radio = 0.25
+    max_vel = math.pi/3
+    radian_total = math.pi      # 180 grados
+    acc = 0.01
     
-    while(grados_total >= 0):
-        radio = 1.0
+    while(radian_total >= 0):
+        if (vel < max_vel):
+            vel += acc
+            
         pub.publish_velocity((radio, vel))
         time.sleep(0.1)
-        grados_recorridos = vel*0.1
-        grados_total -= grados_recorridos
-
-    pub.publish_velocity((0.0, 0.0))
+        radian_recorridos = vel*0.1             # pi/3 * 0.1 = pi/30
+        radian_total -= radian_recorridos
