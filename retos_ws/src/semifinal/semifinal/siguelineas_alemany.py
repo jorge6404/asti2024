@@ -63,6 +63,16 @@ class LineaPublisher(Node):
 
             cv2.imshow('frame', frame)
             
+            # Dibujar líneas horizontales
+            for i in range(1, 3):
+                cv2.line(frame, (0, i * cell_size_y), (cols, i * cell_size_y), (0, 255, 0), 1)
+
+	    # Dibujar líneas verticales
+            for j in range(1, 3):
+                cv2.line(frame, (j * cell_size_x, 0), (j * cell_size_x, rows), (0, 255, 0), 1)
+
+            cv2.imshow('frame', frame)
+            
             # Derecha
             if self.matrix[0, 2] == 1 and self.matrix[0, 0] == 0:
                 self.estacionado = False
