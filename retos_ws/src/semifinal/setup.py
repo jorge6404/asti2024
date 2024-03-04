@@ -23,7 +23,8 @@ setup(
             'laberinto = semifinal.laberinto:main',
             'rosBagManual = semifinal.rosBagManual:main',
             'siguelineas = semifinal.siguelineas_guillem:main',
-            'siguelineas2 = semifinal.siguelineas_alemany:main'
+            'siguelineas2 = semifinal.siguelineas_alemany:main',
+            'keyboard_teleop = semifinal.keyboard_teleop:main'
         ],
     },
 )
