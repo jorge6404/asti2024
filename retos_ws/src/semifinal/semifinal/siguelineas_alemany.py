@@ -22,7 +22,7 @@ class LineaPublisher(Node):
         #self.vid = cv2.VideoCapture('/home/alemany/asti2024/retos_ws/src/semifinal/semifinal/video.mp4')
 
         self.estacionado = True
-        self.giro = "izq"
+        self.giro = "der"
         self.counter = 50
         self.estado = 'Estacionado'
         self.veces_izquierda = 0
@@ -77,9 +77,9 @@ class LineaPublisher(Node):
             
             
             #Bobo
-            if self.veces_derecha >= 7 and self.veces_izquierda >= 7: 
+            if self.veces_derecha >= 3 and self.veces_izquierda >= 3: 
                 self.estacionado = False
-                self.tupla = (0.2, 0.0)
+                self.tupla = (0.1, 0.0)
                 self.estado = 'Recto'
                 self.veces_derecha = 0
                 self.veces_izquierda = 0
@@ -107,7 +107,6 @@ class LineaPublisher(Node):
                 self.estado = 'Derecha'
                 self.giro = 'der'
                 self.veces_derecha += 1
-            
                 
             # Izquierda
             elif self.matrix[0, 0] == 1 and self.matrix[0, 6] == 0:
@@ -131,20 +130,18 @@ class LineaPublisher(Node):
                 self.tupla = (0.0, 0.4)
                 self.estado = 'Izquierda'
                 self.giro = 'izq'
-                self.veces_izquierda += 1
-            
-            
+                self.veces_izquierda += 1            
            
             # Recto
             elif self.matrix[0, 3] == 1 and self.matrix[0, 0] == 0 and self.matrix[0, 6] == 0:
                 self.estacionado = False
-                self.tupla = (0.1, 0.0)
+                self.tupla = (0.5, 0.0)
                 self.estado = 'Recto'
             
             # Recto
             elif self.matrix[0, 0] == 1 and self.matrix[0, 6] == 1:
                 self.estacionado = False
-                self.tupla = (0.1, 0.0)
+                self.tupla = (0.5, 0.0)
                 self.estado = 'Recto'
                 
             # 180º
@@ -153,10 +150,10 @@ class LineaPublisher(Node):
                     self.matrix[6, 3] == 1:
                 self.estacionado = False
                 if self.giro == 'izq':
-                    self.tupla = (0.0, 0.5)
+                    self.tupla = (0.0, 1.0)
                     self.estado = '+180º'
                 elif self.giro == 'der':
-                    self.tupla = (0.0, -0.5)
+                    self.tupla = (0.0, -1.0)
                     self.estado = '-180º'
                     
             # Intersección a izquierda
@@ -176,10 +173,10 @@ class LineaPublisher(Node):
                 todos_cero = np.all(self.matrix == 0)
                 if todos_cero:
                     if self.giro == 'izq':
-                        self.tupla = (0.0, 0.5)
+                        self.tupla = (0.0, 1.0)
                         self.estado = '+180º'
                     elif self.giro == 'der':
-                        self.tupla = (0.0, -0.5)
+                        self.tupla = (0.0, -1.0)
                         self.estado = '-180º'
 
             # Publish tuple data
