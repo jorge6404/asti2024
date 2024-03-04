@@ -16,10 +16,13 @@ class DetectLinea(Node):
         timer_period = 0.1  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
-        self.cap = cv2.VideoCapture(0)  # /home/jcrex/Vídeos/siguelineas_largo.mp4
+        self.cap = cv2.VideoCapture(2)  # /home/jcrex/Vídeos/siguelineas_largo.mp4
         self.cap.set(3, 640)
         self.cap.set(4, 480)
         self.divisiones = 7
+
+        self.contador = 0.01
+        self.memoria = 0
 
     def timer_callback(self):
         self.detectar()
@@ -64,20 +67,37 @@ class DetectLinea(Node):
         suma_derecha = sum(sum(puntos[i][self.divisiones // 2 + 1:]) for i in range(self.divisiones))
         suma_izquierda = sum(sum(puntos[i][:self.divisiones // 2 - 1]) for i in range(self.divisiones))
         diferencia_posiciones = suma_derecha - suma_izquierda
-        print(suma_derecha, suma_izquierda, diferencia_posiciones)
+        #print(suma_derecha, suma_izquierda, diferencia_posiciones)
         return suma_columna_central, diferencia_posiciones
 
     def movimiento(self, vel):
         if vel < -self.divisiones + (self.divisiones // 2):
-            print("Girar izquierda")
-            self.publish_velocity((0.0, -0.1))
+            if self.contador > 0:
+                print("Girar izquierda 2")
+                self.publish_velocity((0.0, 0.1 - self.contador))
+                self.contador -= 0.01
+            else:
+                print("Girar izquierda 1")
+                self.publish_velocity((0.0, 0.1))
+            self.memoria = -1
+            print(self.memoria)
 
         elif vel > self.divisiones // 0.9:
-            print("Girar derecha")
-            self.publish_velocity((0.0, 0.1))
+            if self.contador > 0:
+                print("Girar derecha 2")
+                self.publish_velocity((0.0, -0.1 + self.contador))
+                self.contador += 0.01
+            else:
+                print("Girar derecha 1")
+                self.publish_velocity((0.0, -0.1))
+            self.memoria = 1
+            print(self.memoria)
         else:
-            print("ir recto")
+            print("ir recto 0")
             self.publish_velocity((0.1, 0.0))
+            self.contador = 0.0
+            #self.memoria = 0
+            print(self.memoria)
 
     def detectar(self):
         while True:
@@ -85,7 +105,7 @@ class DetectLinea(Node):
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
             hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
             lower_blue = np.array([0, 0, 0])
-            upper_blue = np.array([50, 50, 50])
+            upper_blue = np.array([35, 35, 35])
 
             mask = cv2.inRange(hsv, lower_blue, upper_blue)
             resultado = cv2.bitwise_and(img, img, mask=mask)
@@ -104,7 +124,31 @@ class DetectLinea(Node):
             suma_central, diferencia = self.calcular_diferencia_puntos(puntos)
             #print(suma_central, diferencia, suma_central + diferencia, self.divisiones + diferencia)
 
-            self.movimiento(diferencia)
+            """
+            if suma_central == diferencia == 0:
+                if self.contador > 0.0:
+                    self.publish_velocity((0.0, 0.1))
+                self.contador += 0.01
+            elif suma_central == diferencia == 0:
+                if self.contador > 2.0:
+                    self.publish_velocity((0.0, -0.1))
+                self.contador -= 0.01
+            else:
+                self.movimiento(diferencia)
+            
+            """
+
+            if suma_central == diferencia == 0:
+                if self.memoria == 0:
+                    print("memoria recta")
+                    self.publish_velocity((-0.1, 0.0))
+                elif self.memoria == 1:
+                    self.publish_velocity((0.0, -0.1))
+                elif self.memoria == -1:
+                    self.publish_velocity((0.0, 0.1))
+
+            else:
+                self.movimiento(diferencia)
 
             #self.publish((suma_central, diferencia))
 
@@ -154,6 +198,7 @@ def main(args=None):
                 "Valor intermedio ir recto \n"
                 "No poner nada acaba el programa \n"
             )
+            movimiento.publish_velocity((0.0, 0.0))
         #rclpy.spin(movimiento)
         movimiento.destroy_node()
 
