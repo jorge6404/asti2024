@@ -12,12 +12,12 @@ class LineaPublisher(Node):
         super().__init__('linea_publisher')
         self.publisher_ = self.create_publisher(Twist, 'cmd_vel', 10)
         self.publisher_
-        timer_period = 0.1  # seconds
+        timer_period = 0.01  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
         self.tupla = (0.0, 0.0)
         self.matrix = np.zeros((7, 7), dtype=int)
-        self.black_threshold = 20
+        self.black_threshold = 40
         self.vid = cv2.VideoCapture(2)
         #self.vid = cv2.VideoCapture('/home/alemany/asti2024/retos_ws/src/semifinal/semifinal/video.mp4')
 
@@ -76,19 +76,83 @@ class LineaPublisher(Node):
             # Derecha
             if self.matrix[0, 6] == 1 and self.matrix[0, 0] == 0:
                 self.estacionado = False
-                self.tupla = (0.3, -2.0)
+                self.tupla = (0.0, -0.2)
                 self.estado = 'Derecha'
+                self.giro = 'der'
+                
+            # Derecha 2
+            elif self.matrix[1, 6] == 1 and self.matrix[1, 0] == 0:
+                self.estacionado = False
+                self.tupla = (0.0, -0.3)
+                self.estado = 'Derecha'
+                self.giro = 'der'
+            
+            # Derecha 3
+            elif self.matrix[2, 6] == 1 and self.matrix[2, 0] == 0:
+                self.estacionado = False
+                self.tupla = (0.0, -0.4)
+                self.estado = 'Derecha'
+                self.giro = 'der'
+                
+            # Derecha 4
+            elif self.matrix[3, 6] == 1 and self.matrix[3, 0] == 0:
+                self.estacionado = False
+                self.tupla = (0.0, -0.5)
+                self.estado = 'Derecha'
+                self.giro = 'der'
+            
+            # Derecha 5
+            elif self.matrix[4, 6] == 1 and self.matrix[4, 0] == 0:
+                self.estacionado = False
+                self.tupla = (0.0, -0.6)
+                self.estado = 'Derecha'
+                self.giro = 'der'
                 
             # Izquierda
             elif self.matrix[0, 0] == 1 and self.matrix[0, 6] == 0:
                 self.estacionado = False
-                self.tupla = (0.3, 2.0)
+                self.tupla = (0.0, 0.2)
                 self.estado = 'Izquierda'
+                self.giro = 'izq'
+                
+            # Izquierda 2
+            elif self.matrix[1, 0] == 1 and self.matrix[1, 6] == 0:
+                self.estacionado = False
+                self.tupla = (0.0, 0.3)
+                self.estado = 'Izquierda'
+                self.giro = 'izq'
+            
+            # Izquierda 3
+            elif self.matrix[2, 0] == 1 and self.matrix[2, 6] == 0:
+                self.estacionado = False
+                self.tupla = (0.0, 0.4)
+                self.estado = 'Izquierda'
+                self.giro = 'izq'
+            
+            # Izquierda 4
+            elif self.matrix[3, 0] == 1 and self.matrix[3, 6] == 0:
+                self.estacionado = False
+                self.tupla = (0.0, 0.5)
+                self.estado = 'Izquierda'
+                self.giro = 'izq'
+            
+            # Izquierda 5
+            elif self.matrix[4, 0] == 1 and self.matrix[4, 6] == 0:
+                self.estacionado = False
+                self.tupla = (0.0, 0.6)
+                self.estado = 'Izquierda'
+                self.giro = 'izq'
             
             # Recto
             elif self.matrix[0, 3] == 1 and self.matrix[0, 0] == 0 and self.matrix[0, 6] == 0:
                 self.estacionado = False
-                self.tupla = (0.3, 0.0)
+                self.tupla = (0.1, 0.0)
+                self.estado = 'Recto'
+            
+            # Recto
+            elif self.matrix[0, 0] == 1 and self.matrix[0, 6] == 1:
+                self.estacionado = False
+                self.tupla = (0.1, 0.0)
                 self.estado = 'Recto'
                 
             # 180º
@@ -97,10 +161,10 @@ class LineaPublisher(Node):
                     self.matrix[6, 3] == 1:
                 self.estacionado = False
                 if self.giro == 'izq':
-                    self.tupla = (0.0, 2.0)
+                    self.tupla = (0.0, 0.5)
                     self.estado = '+180º'
                 elif self.giro == 'der':
-                    self.tupla = (0.0, -2.0)
+                    self.tupla = (0.0, -0.5)
                     self.estado = '-180º'
                     
             # Intersección a izquierda
@@ -136,7 +200,7 @@ class LineaPublisher(Node):
             self.publisher_.publish(msg)
             self.get_logger().info(f'Publishing: velocity="({msg.linear.x}, {msg.angular.z})"')
 
-            if cv2.waitKey(100) & 0xFF == ord('q'):
+            if cv2.waitKey(10) & 0xFF == ord('q'):
                 self.vid.release()
                 cv2.destroyAllWindows()
                 rclpy.shutdown()
