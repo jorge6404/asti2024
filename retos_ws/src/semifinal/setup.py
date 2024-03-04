@@ -22,9 +22,10 @@ setup(
         'console_scripts': [
             'laberinto = semifinal.laberinto:main',
             'rosBagManual = semifinal.rosBagManual:main',
-            'siguelineas = semifinal.siguelineas_guillem:main',
+            'siguelineas = semifinal.siguelineas_puntos:main',
             'siguelineas2 = semifinal.siguelineas_alemany:main',
-            'keyboard_teleop = semifinal.keyboard_teleop:main'
+            'keyboard_teleop = semifinal.keyboard_teleop:main',
+            'rectificador = semifinal.rectificador:main',
         ],
     },
 )
