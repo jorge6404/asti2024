@@ -25,6 +25,8 @@ class LineaPublisher(Node):
         self.giro = "izq"
         self.counter = 50
         self.estado = 'Estacionado'
+        self.veces_izquierda = 0
+        self.veces_derecha = 0
 
     def timer_callback(self):
 
@@ -73,12 +75,22 @@ class LineaPublisher(Node):
 
             cv2.imshow('frame', frame)
             
+            
+            #Bobo
+            if self.veces_derecha >= 7 and self.veces_izquierda >= 7: 
+                self.estacionado = False
+                self.tupla = (0.2, 0.0)
+                self.estado = 'Recto'
+                self.veces_derecha = 0
+                self.veces_izquierda = 0
+                
             # Derecha
-            if self.matrix[0, 6] == 1 and self.matrix[0, 0] == 0:
+            elif self.matrix[0, 6] == 1 and self.matrix[0, 0] == 0:
                 self.estacionado = False
                 self.tupla = (0.0, -0.2)
                 self.estado = 'Derecha'
                 self.giro = 'der'
+                self.veces_derecha += 1
                 
             # Derecha 2
             elif self.matrix[1, 6] == 1 and self.matrix[1, 0] == 0:
@@ -86,6 +98,7 @@ class LineaPublisher(Node):
                 self.tupla = (0.0, -0.3)
                 self.estado = 'Derecha'
                 self.giro = 'der'
+                self.veces_derecha += 1
             
             # Derecha 3
             elif self.matrix[2, 6] == 1 and self.matrix[2, 0] == 0:
@@ -93,20 +106,8 @@ class LineaPublisher(Node):
                 self.tupla = (0.0, -0.4)
                 self.estado = 'Derecha'
                 self.giro = 'der'
-                
-            # Derecha 4
-            elif self.matrix[3, 6] == 1 and self.matrix[3, 0] == 0:
-                self.estacionado = False
-                self.tupla = (0.0, -0.5)
-                self.estado = 'Derecha'
-                self.giro = 'der'
+                self.veces_derecha += 1
             
-            # Derecha 5
-            elif self.matrix[4, 6] == 1 and self.matrix[4, 0] == 0:
-                self.estacionado = False
-                self.tupla = (0.0, -0.6)
-                self.estado = 'Derecha'
-                self.giro = 'der'
                 
             # Izquierda
             elif self.matrix[0, 0] == 1 and self.matrix[0, 6] == 0:
@@ -114,6 +115,7 @@ class LineaPublisher(Node):
                 self.tupla = (0.0, 0.2)
                 self.estado = 'Izquierda'
                 self.giro = 'izq'
+                self.veces_izquierda += 1
                 
             # Izquierda 2
             elif self.matrix[1, 0] == 1 and self.matrix[1, 6] == 0:
@@ -121,6 +123,7 @@ class LineaPublisher(Node):
                 self.tupla = (0.0, 0.3)
                 self.estado = 'Izquierda'
                 self.giro = 'izq'
+                self.veces_izquierda += 1
             
             # Izquierda 3
             elif self.matrix[2, 0] == 1 and self.matrix[2, 6] == 0:
@@ -128,21 +131,10 @@ class LineaPublisher(Node):
                 self.tupla = (0.0, 0.4)
                 self.estado = 'Izquierda'
                 self.giro = 'izq'
+                self.veces_izquierda += 1
             
-            # Izquierda 4
-            elif self.matrix[3, 0] == 1 and self.matrix[3, 6] == 0:
-                self.estacionado = False
-                self.tupla = (0.0, 0.5)
-                self.estado = 'Izquierda'
-                self.giro = 'izq'
             
-            # Izquierda 5
-            elif self.matrix[4, 0] == 1 and self.matrix[4, 6] == 0:
-                self.estacionado = False
-                self.tupla = (0.0, 0.6)
-                self.estado = 'Izquierda'
-                self.giro = 'izq'
-            
+           
             # Recto
             elif self.matrix[0, 3] == 1 and self.matrix[0, 0] == 0 and self.matrix[0, 6] == 0:
                 self.estacionado = False
@@ -182,15 +174,13 @@ class LineaPublisher(Node):
             # No detecta negro
             else:
                 todos_cero = np.all(self.matrix == 0)
-                if todos_cero and self.estacionado is False:
-                    self.counter -= 1
-                    print(f'Counter: {self.counter}')
-                    if self.counter == 0:
-                        self.estacionado = True
-                    if todos_cero and self.estacionado:
-                        self.tupla = (0.0, 0.0)
-                        self.estado = 'Estacionado'
-                        self.counter = 50
+                if todos_cero:
+                    if self.giro == 'izq':
+                        self.tupla = (0.0, 0.5)
+                        self.estado = '+180º'
+                    elif self.giro == 'der':
+                        self.tupla = (0.0, -0.5)
+                        self.estado = '-180º'
 
             # Publish tuple data
             msg = Twist()
