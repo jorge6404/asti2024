@@ -19,10 +19,11 @@ class LineaPublisher(Node):
         self.matrix = np.zeros((3, 3), dtype=int)
         self.black_threshold = 50
         self.vid = cv2.VideoCapture(0)
+        #self.vid = cv2.VideoCapture('/home/alemany/asti2024/retos_ws/src/semifinal/semifinal/video.mp4')
 
         self.estacionado = True
         self.giro = "izq"
-        self.counter = 300
+        self.counter = 50
         self.estado = 'Estacionado'
 
     def timer_callback(self):
@@ -115,7 +116,7 @@ class LineaPublisher(Node):
                     if todos_cero and self.estacionado:
                         self.tupla = (0.0, 0.0)
                         self.estado = 'Estacionado'
-                        self.counter = 300
+                        self.counter = 50
 
             # Publish tuple data
             msg = Twist()
@@ -125,7 +126,7 @@ class LineaPublisher(Node):
             self.publisher_.publish(msg)
             self.get_logger().info(f'Publishing: velocity="({msg.linear.x}, {msg.angular.z})"')
 
-            if cv2.waitKey(1) & 0xFF == ord('q'):
+            if cv2.waitKey(100) & 0xFF == ord('q'):
                 self.vid.release()
                 cv2.destroyAllWindows()
                 rclpy.shutdown()
