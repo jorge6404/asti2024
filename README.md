@@ -24,3 +24,24 @@
   - ros2 topic pub -1 /set_velocity custom_interfaces/SetVelocity "{id: 1, velocity: 500}"
     - Donde id es 1 o 2, y velocity puede ser + o -
 
+## Compilación
+
+- cd asti2024/test_ws
+
+- colcon build --packages-select custom_interfaces
+- colcon build --packages-select dynamixel_sdk
+- source install/setup.bash
+- colcon build --symlink-install --packages-select bringup movement
+- source install/setup.bash
+
+
+- cd ../retos_ws
+
+- colcon build --packages-select custom_interfaces
+- source install/setup.bash
+- colcon build --symlink-install --packages-select semifinal
+- source install/setup.bash
+
+Y ya está todo listo mi rey, ya puedes ejecutar los programas como "ros2 run semifinal siguelineas"
+
+
