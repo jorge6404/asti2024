@@ -22,7 +22,8 @@ setup(
         'console_scripts': [
             'laberinto = semifinal.laberinto:main',
             'rosBagManual = semifinal.rosBagManual:main',
-            'siguelineas = semifinal.siguelineas_guillem:main'
+            'siguelineas = semifinal.siguelineas_guillem:main',
+            'siguelineas2 = semifinal.siguelineas_alemany:main'
         ],
     },
 )
