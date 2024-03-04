@@ -16,8 +16,8 @@ class LineaPublisher(Node):
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
         self.tupla = (0.0, 0.0)
-        self.matrix = np.zeros((3, 3), dtype=int)
-        self.black_threshold = 50
+        self.matrix = np.zeros((7, 7), dtype=int)
+        self.black_threshold = 20
         self.vid = cv2.VideoCapture(2)
         #self.vid = cv2.VideoCapture('/home/alemany/asti2024/retos_ws/src/semifinal/semifinal/video.mp4')
 
@@ -51,10 +51,10 @@ class LineaPublisher(Node):
             except AttributeError:
                 break
 
-            cell_size_x = cols // 3
-            cell_size_y = rows // 3
-            for i in range(3):
-                for j in range(3):
+            cell_size_x = cols // 7
+            cell_size_y = rows // 7
+            for i in range(7):
+                for j in range(7):
                     roi = frame[i * cell_size_y:(i + 1) * cell_size_y, j * cell_size_x:(j + 1) * cell_size_x]
                     if self.check_for_black(roi):
                         self.matrix[i, j] = 1
@@ -64,54 +64,54 @@ class LineaPublisher(Node):
             cv2.imshow('frame', frame)
             
             # Dibujar líneas horizontales
-            for i in range(1, 3):
+            for i in range(1, 7):
                 cv2.line(frame, (0, i * cell_size_y), (cols, i * cell_size_y), (0, 255, 0), 1)
 
 	    # Dibujar líneas verticales
-            for j in range(1, 3):
+            for j in range(1, 7):
                 cv2.line(frame, (j * cell_size_x, 0), (j * cell_size_x, rows), (0, 255, 0), 1)
 
             cv2.imshow('frame', frame)
             
             # Derecha
-            if self.matrix[0, 2] == 1 and self.matrix[0, 0] == 0:
+            if self.matrix[0, 6] == 1 and self.matrix[0, 0] == 0:
                 self.estacionado = False
-                self.tupla = (0.1, -2.0)
+                self.tupla = (0.3, -2.0)
                 self.estado = 'Derecha'
                 
             # Izquierda
-            elif self.matrix[0, 0] == 1 and self.matrix[0, 2] == 0:
+            elif self.matrix[0, 0] == 1 and self.matrix[0, 6] == 0:
                 self.estacionado = False
-                self.tupla = (0.1, 2.0)
+                self.tupla = (0.3, 2.0)
                 self.estado = 'Izquierda'
             
             # Recto
-            elif self.matrix[0, 1] == 1 and self.matrix[0, 0] == 0 and self.matrix[0, 2] == 0:
+            elif self.matrix[0, 3] == 1 and self.matrix[0, 0] == 0 and self.matrix[0, 6] == 0:
                 self.estacionado = False
-                self.tupla = (0.2, 0.0)
+                self.tupla = (0.3, 0.0)
                 self.estado = 'Recto'
                 
             # 180º
-            elif self.matrix[0, 1] == 0 and self.matrix[0, 0] == 0 and self.matrix[0, 2] == 0 and self.matrix[
-                1, 1] == 1 and \
-                    self.matrix[2, 1] == 1:
+            elif self.matrix[0, 3] == 0 and self.matrix[0, 0] == 0 and self.matrix[0, 6] == 0 and self.matrix[
+                3, 3] == 1 and \
+                    self.matrix[6, 3] == 1:
                 self.estacionado = False
                 if self.giro == 'izq':
-                    self.tupla = (0.0, 2.5)
+                    self.tupla = (0.0, 2.0)
                     self.estado = '+180º'
                 elif self.giro == 'der':
-                    self.tupla = (0.0, -2.5)
+                    self.tupla = (0.0, -2.0)
                     self.estado = '-180º'
                     
             # Intersección a izquierda
-            elif self.matrix[0, 0] == 1 and self.matrix[0, 2] == 1 and self.matrix[2, 0] == 1 and self.matrix[
-                2, 2] == 0:
+            elif self.matrix[0, 0] == 1 and self.matrix[0, 6] == 1 and self.matrix[6, 0] == 1 and self.matrix[
+                6, 6] == 0:
                 self.estacionado = False
                 self.giro = 'izq'
             
             # Intersección a derecha
-            elif self.matrix[0, 0] == 1 and self.matrix[0, 2] == 1 and self.matrix[2, 0] == 0 and self.matrix[
-                2, 2] == 1:
+            elif self.matrix[0, 0] == 1 and self.matrix[0, 6] == 1 and self.matrix[6, 0] == 0 and self.matrix[
+                6, 6] == 1:
                 self.estacionado = False
                 self.giro = 'der'
                 
