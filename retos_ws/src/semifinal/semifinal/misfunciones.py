@@ -93,9 +93,10 @@ def izquierda(pub, max_vel, degrees, acc_ang=0.01):
 def avanzar_derecha(pub, vel_lin, radio, grados):
     # TODO: Comprobar el robot físico
     
+    vel_lin -= 0.1
     radian_total = grados*math.pi/180
     
-    while(radian_total >= 0.0):          # TODO: ver vien
+    while(radian_total >= 0.2):          # TODO: ver vien
         print(vel_lin/radio)
         angular_vel:float = vel_lin/radio
         
@@ -110,9 +111,10 @@ def avanzar_derecha(pub, vel_lin, radio, grados):
 def avanzar_izquierda(pub, vel_lin, radio, grados):
     # TODO: Comprobar el robot físico
     
+    vel_lin -= 0.1
     radian_total = grados*math.pi/180
     
-    while(radian_total >= 0):
+    while(radian_total >= 0.2):
         
             
         angular_vel = vel_lin/radio

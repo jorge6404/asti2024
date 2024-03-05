@@ -25,7 +25,7 @@ def main(args=None):
     # Argumentos opcionales
     
     parser = argparse.ArgumentParser(description='Publish velocities to a ROS2 topic.')
-    parser.add_argument('-vl', type=float, default=0.2, help='The linear to publish.')
+    parser.add_argument('-vl', type=float, default=0.3, help='The linear to publish.')
     parser.add_argument('-va', type=float, default=1.0, help='The angular to publish.')
     parser.add_argument('-al', type=float, default=0.01, help='Linear acceleration.')
     parser.add_argument('-aa', type=float, default=0.1 , help='Angular acceleration.')
@@ -60,11 +60,11 @@ def main(args=None):
     
     # LABERINTO PRO
     
-    recto               (minimal_publisher, max_vel=vel_lin, distancia_total=0.4, acc_lin=acc_lin)     # Todo: Bajar distancia total para que el robot empiece a girar antes
-    avanzar_derecha     (minimal_publisher, vel_lin=vel_lin, radio=0.3, grados=180)
-    recto               (minimal_publisher, max_vel=vel_lin, distancia_total=0.4, acc_lin=acc_lin)
-    avanzar_izquierda   (minimal_publisher, vel_lin=vel_lin, radio=0.3, grados=180)
-    recto               (minimal_publisher, max_vel=vel_lin, distancia_total=0.4, acc_lin=acc_lin)
+    recto               (minimal_publisher, max_vel=vel_lin, distancia_total=1.25, acc_lin=acc_lin)     # Todo: Bajar distancia total para que el robot empiece a girar antes
+    avanzar_derecha     (minimal_publisher, vel_lin=vel_lin, radio=0.2, grados=180)
+    recto               (minimal_publisher, max_vel=vel_lin, distancia_total=0.5, acc_lin=acc_lin)
+    avanzar_izquierda   (minimal_publisher, vel_lin=vel_lin, radio=0.2, grados=180)
+    recto               (minimal_publisher, max_vel=vel_lin, distancia_total=1.6, acc_lin=acc_lin)
     
     executor.add_node(minimal_publisher)
     try:
