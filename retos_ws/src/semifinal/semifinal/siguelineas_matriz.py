@@ -213,13 +213,13 @@ class LineaPublisher(Node):
             # Recto
             elif self.matrix[0, 3] == 1 and self.matrix[0, 0] == 0 and self.matrix[0, 6] == 0:
                 self.estacionado = False
-                self.tupla = (0.7, 0.0)
+                self.tupla = (0.5, 0.0)
                 self.estado = 'Recto'
             
             # Recto
             elif self.matrix[0, 0] == 1 and self.matrix[0, 6] == 1:
                 self.estacionado = False
-                self.tupla = (0.7, 0.0)
+                self.tupla = (0.5, 0.0)
                 self.estado = 'Recto'
                 
             # 180º
