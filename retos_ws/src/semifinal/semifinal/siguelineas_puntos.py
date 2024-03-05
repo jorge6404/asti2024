@@ -6,16 +6,23 @@ from std_msgs.msg import Int32
 from geometry_msgs.msg import Twist
 from semifinal.misfunciones import *
 
+from sensor_msgs.msg import Image  # Image is the message type
+from cv_bridge import CvBridge  # Package to convert between ROS and OpenCV Images
+
 
 class DetectLinea(Node):
-    def __init__(self):
+    def __init__(self, camara_sub=False):
         super().__init__('detectar_linea')
         self.publisher_ = self.create_publisher(Twist, 'cmd_vel', 10)
         self.publisher_
 
+        if camara_sub:
+            self.publiscam_ = self.create_publisher(Image, 'video_frames', 10)
+            self.br = CvBridge()
+
         self.subscriber_ = self.create_subscription(Int32, 'rectificar', self.listener_callback, 10)
 
-        timer_period = 0.01  # seconds
+        timer_period = 0.001  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
         self.cap = cv2.VideoCapture(0)  # /home/jcrex/Vídeos/siguelineas_largo.mp4
@@ -23,11 +30,13 @@ class DetectLinea(Node):
         self.cap.set(4, 480)
         self.divisiones = 7
 
-        self.contador = 0.01
+        self.contador = 0.15
         self.memoria = 0
 
         self.lower_blue = np.array([0, 0, 0])
         self.upper_blue = np.array([35, 35, 35])
+
+        self.camara_sub = camara_sub
 
     def timer_callback(self):
         self.detectar()
@@ -47,9 +56,17 @@ class DetectLinea(Node):
         # Uso para el testeo de camara
         while True:
             success, img = self.cap.read()
-            cv2.imshow("Video", img)
-            if cv2.waitKey(100) & 0xFF == ord('q'):
+            if self.camara_sub:
+                self.publishcamara(img)
+            else:
+                cv2.imshow("video", img)
+
+            if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
+
+    def publishcamara(self, img):
+        self.publiscam_.publish(self.br.cv2_to_imgmsg(img))
+        self.get_logger().info('Publishing video frame')
 
     def detectar_puntos_activos(self, cuadricula, hImg, wImg, img, puntos):
         """
@@ -115,15 +132,16 @@ class DetectLinea(Node):
             if self.memoria == 0:
                 # Mantener la trayectoria recta (si no hay memoria de giro previo)
                 print("Mantener la trayectoria recta")
-                self.publish_velocity((-0.1, 0.0))
+                self.publish_velocity((0.1, 0.0))
+                time.sleep(1)
             elif self.memoria == 1:
                 # Girar hacia la izquierda (usando la memoria de giro previa)
                 self.publish_velocity((0.0, -self.contador))
-                self.contador -= 0.001
+                self.contador -= 0.05
             elif self.memoria == -1:
                 # Girar hacia la derecha (usando la memoria de giro previa)
                 self.publish_velocity((0.0, self.contador))
-                self.contador += 0.001
+                self.contador += 0.02
 
         # Caso 2: La velocidad es negativa (girar hacia la izquierda)
         elif vel < -13:
@@ -131,7 +149,7 @@ class DetectLinea(Node):
                 # Ajustar la velocidad angular para una rotación más suave
                 print("Girar hacia la izquierda con mayor suavidad")
                 self.publish_velocity((0.0, velocidad_angular - self.contador))
-                self.contador -= 0.01
+                self.contador -= 0.02
             else:
                 # Giro estándar hacia la izquierda
                 print("Girar hacia la izquierda")
@@ -144,7 +162,7 @@ class DetectLinea(Node):
                 # Ajustar la velocidad angular para una rotación más suave
                 print("Girar hacia la derecha con mayor suavidad")
                 self.publish_velocity((0.0, -velocidad_angular + self.contador))
-                self.contador += 0.01
+                self.contador += 0.02
             else:
                 # Giro estándar hacia la derecha
                 print("Girar hacia la derecha")
@@ -155,9 +173,9 @@ class DetectLinea(Node):
         else:
             print("Ir recto")
             # Publicar velocidad para avanzar recto
-            self.publish_velocity((0.35, 0.0))
+            self.publish_velocity((0.18, 0.0))
             # Reiniciar el contador de ajuste de giro
-            self.contador = 0.0
+            self.contador = 0.2
 
     def detectar(self):
         # Bucle principal para detectar puntos activos y realizar movimientos
@@ -199,11 +217,15 @@ class DetectLinea(Node):
             self.movimiento(suma_central, diferencia)
 
             # Mostrar las imágenes resultantes
-            cv2.imshow("Result", resultado)
-            cv2.imshow("Video", img)
+
+            if self.camara_sub:
+                self.publishcamara(img)
+            else:
+                #cv2.imshow("Result", resultado)
+                cv2.imshow("Video", img)
 
             # Esperar a que se presione la tecla 'q' para salir del bucle
-            if cv2.waitKey(10) & 0xFF == ord('q'):
+            if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
 
@@ -222,26 +244,19 @@ def menu():
 
 
 def main(args=None):
-    opcion = menu()
-    if opcion == 1:
-        rclpy.init(args=args)
-        detectar_linea = DetectLinea()
-        rclpy.spin(detectar_linea)
-        detectar_linea.destroy_node()
-        rclpy.shutdown()
 
-    elif opcion == 2:
-        rclpy.init(args=args)
-        movimiento = DetectLinea()
-        vel = int(input(
-            "Elija la direccion que tomara: \n"
-            "Valor < -13 girar a la izquierda \n"
-            "Valor > 18 girar a la derecha \n"
-            "Valor intermedio ir recto \n"
-            "No poner nada acaba el programa \n"
-        ))
-        while vel != "":
-            movimiento.movimiento(0, vel)
+    rclpy.init(args=args)
+    if input("esta en raspberry y/n ") == "y":
+        robot = DetectLinea(camara_sub=True)
+    else:
+        robot = DetectLinea()
+
+    opcion = menu()
+
+    while opcion != 5:
+        if opcion == 1:
+            rclpy.spin(robot)
+        elif opcion == 2:
             vel = int(input(
                 "Elija la direccion que tomara: \n"
                 "Valor < -13 girar a la izquierda \n"
@@ -249,31 +264,33 @@ def main(args=None):
                 "Valor intermedio ir recto \n"
                 "No poner nada acaba el programa \n"
             ))
-        movimiento.publish_velocity((0.0, 0.0))
-        #rclpy.spin(movimiento)
-        movimiento.destroy_node()
-        rclpy.shutdown()
+            while vel != "":
+                robot.movimiento(0, vel)
+                vel = int(input(
+                    "Elija la direccion que tomara: \n"
+                    "Valor < -13 girar a la izquierda \n"
+                    "Valor > 18 girar a la derecha \n"
+                    "Valor intermedio ir recto \n"
+                    "No poner nada acaba el programa \n"
+                ))
+            robot.publish_velocity((0.0, 0.0))
 
-    elif opcion == 3:
-        rclpy.init(args=args)
-        camara = DetectLinea()
-        print("activada")
-        camara.camara()
-        rclpy.spin(camara)
-        camara.destroy_node()
-        rclpy.shutdown()
+        elif opcion == 3:
+            print("activada")
+            robot.camara()
+            rclpy.spin(robot)
 
-    elif opcion == 4:
-        rclpy.init(args=args)
-        detectar_linea = DetectLinea()
-        detectar_linea.lower_blue = np.array([int(input("Introduce el valor de azul minimo: ")), int(input("Introduce el valor de verde minimo: ")), int(input("Introduce el valor de rojo minimo: "))])
-        detectar_linea.upper_blue = np.array([int(input("Introduce el valor de azul maximo: ")), int(input("Introduce el valor de verde maximo: ")), int(input("Introduce el valor de rojo maximo: "))])
-        rclpy.spin(detectar_linea)
-        detectar_linea.destroy_node()
-        rclpy.shutdown()
+        elif opcion == 4:
+            robot.lower_blue = np.array(
+                [int(input("Introduce el valor de azul minimo: ")), int(input("Introduce el valor de verde minimo: ")),
+                 int(input("Introduce el valor de rojo minimo: "))])
+            robot.upper_blue = np.array(
+                [int(input("Introduce el valor de azul maximo: ")), int(input("Introduce el valor de verde maximo: ")),
+                 int(input("Introduce el valor de rojo maximo: "))])
+            rclpy.spin(robot)
 
-    elif opcion == 5:
-        print("Saliendo del programa")
+    robot.destroy_node()
+    rclpy.shutdown()
 
 
 if __name__ == '__main__':
