@@ -18,7 +18,7 @@ class LineaPublisher(Node):
         self.tupla = (0.0, 0.0)
         self.matrix = np.zeros((7, 7), dtype=int)
         self.black_threshold = 40
-        self.vid = cv2.VideoCapture(2)
+        self.vid = cv2.VideoCapture(0)
         #self.vid = cv2.VideoCapture('/home/alemany/asti2024/retos_ws/src/semifinal/semifinal/video.mp4')
 
         self.estacionado = True
@@ -269,6 +269,17 @@ class LineaPublisher(Node):
                 self.vid.release()
                 cv2.destroyAllWindows()
                 rclpy.shutdown()
+            
+            # PULSAMOS C PARA QUE SIGA HACIA DELANTE FORZOSAMENTE CUANDO NOS CONVENGA (LA CÁMARA SE PARA PERO EN TEORIA DEBERÍA DAR IGUAL)
+            elif cv2.waitKey(10) & 0xFF == ord('c'):
+                msg = Twist()
+                msg.linear.x = 0.5
+                msg.angular.z = 0.0
+                print('Recto')
+                self.publisher_.publish(msg)
+                self.get_logger().info(f'Publishing: velocity="({msg.linear.x}, {msg.angular.z})"')
+                sleep(1)
+                
 
     # DETENER CAPTURA IMÁGEN
     def stop_video_capture(self):
