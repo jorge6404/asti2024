@@ -94,6 +94,14 @@ MotorController::MotorController()
          } else {
             right_wheel_velocity = (angular_velocity * (linear_velocity + WHEEL_SEPARATION / 2)) * distance_unit;
             left_wheel_velocity = (angular_velocity * (linear_velocity - WHEEL_SEPARATION / 2)) * distance_unit;
+            
+            if (angular_velocity < 0) {
+               uint32_t aux;
+               aux = right_wheel_velocity;
+               right_wheel_velocity = -left_wheel_velocity;
+               left_wheel_velocity = -aux;
+            }
+            
          }
 
          // Send goal velocity (4 bytes) to each one of the DYNAMIXELs

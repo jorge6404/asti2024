@@ -90,37 +90,37 @@ def izquierda(pub, max_vel, degrees, acc_ang=0.01):
 
 # -------- FUNCIONES ROTACION CON RADIO ----------------
 
-def avanzar_derecha(pub, vel):
+def avanzar_derecha(pub, vel_lin, radio, grados):
     # TODO: Comprobar el robot físico
     
-    radio = 0.25
-    max_vel = math.pi/3
-    radian_total = math.pi      # 180 grados
-    acc = 0.01
+    radian_total = grados*math.pi/180
     
-    while(radian_total >= 0):
-        if (vel < max_vel):
-            vel += acc
-            
-        pub.publish_velocity((radio, -vel))
+    while(radian_total >= 0.0):          # TODO: ver vien
+        print(vel_lin/radio)
+        angular_vel:float = vel_lin/radio
+        
+        pub.publish_velocity((vel_lin, -angular_vel))
+        
         time.sleep(0.1)
-        radian_recorridos = vel*0.1             # pi/3 * 0.1 = pi/30
+        radian_recorridos = angular_vel * 0.1             # pi/3 * 0.1 = pi/30
         radian_total -= radian_recorridos
 
     pub.publish_velocity((0.0, 0.0))
     
-def avanzar_izquierda(pub, vel):
+def avanzar_izquierda(pub, vel_lin, radio, grados):
     # TODO: Comprobar el robot físico
-    radio = 0.25
-    max_vel = math.pi/3
-    radian_total = math.pi      # 180 grados
-    acc = 0.01
+    
+    radian_total = grados*math.pi/180
     
     while(radian_total >= 0):
-        if (vel < max_vel):
-            vel += acc
+        
             
-        pub.publish_velocity((radio, vel))
+        angular_vel = vel_lin/radio
+        
+        pub.publish_velocity((vel_lin, angular_vel))
+        
         time.sleep(0.1)
-        radian_recorridos = vel*0.1             # pi/3 * 0.1 = pi/30
+        radian_recorridos = angular_vel * 0.1             # pi/3 * 0.1 = pi/30
         radian_total -= radian_recorridos
+
+    pub.publish_velocity((0.0, 0.0))
