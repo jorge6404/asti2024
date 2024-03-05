@@ -88,7 +88,7 @@ class LineaPublisher(Node):
 
     # OPCIÓN 2: MOVER ROBOT
     def move_robot(self):
-        moves = [(0.0, 1.0), (0.0, -1.0), (0.5, 0.0), (-0.5, 0.0)]
+        moves = [(0.0, 1.0), (0.0, -1.0), (0.1, 0.0), (-0.1, 0.0)]
 
         for move in moves:
             self.tupla = move
@@ -141,15 +141,31 @@ class LineaPublisher(Node):
             #Bobo
             if self.veces_derecha >= 3 and self.veces_izquierda >= 3: 
                 self.estacionado = False
-                self.tupla = (0.4, 0.0)
+                self.tupla = (0.3, 0.0)
                 self.estado = 'Recto'
                 self.veces_derecha = 0
                 self.veces_izquierda = 0
+            
+            # Cruce de lado 1
+            elif self.matrix[0, 6] == 1 and self.matrix[1, 0] == 1 and self.matrix[0, 0] == 0:
+                self.estacionado = False
+                self.tupla = (0.0, 0.7)
+                self.estado = 'Izquierda'
+                self.giro = 'izq'
+                self.veces_izquierda += 1
+            
+            # Cruce de lado 2
+            elif self.matrix[0, 6] == 0 and self.matrix[1, 6] == 1 and self.matrix[0, 0] == 1:
+                self.estacionado = False
+                self.tupla = (0.0, -0.7)
+                self.estado = 'Derecha'
+                self.giro = 'der'
+                self.veces_derecha += 1
                 
             # Derecha
             elif self.matrix[0, 6] == 1 and self.matrix[0, 0] == 0:
                 self.estacionado = False
-                self.tupla = (0.0, -0.4)
+                self.tupla = (0.0, -0.1)
                 self.estado = 'Derecha'
                 self.giro = 'der'
                 self.veces_derecha += 1
@@ -157,7 +173,7 @@ class LineaPublisher(Node):
             # Derecha 2
             elif self.matrix[1, 6] == 1 and self.matrix[1, 0] == 0:
                 self.estacionado = False
-                self.tupla = (0.0, -0.5)
+                self.tupla = (0.0, -0.2)
                 self.estado = 'Derecha'
                 self.giro = 'der'
                 self.veces_derecha += 1
@@ -165,7 +181,7 @@ class LineaPublisher(Node):
             # Derecha 3
             elif self.matrix[2, 6] == 1 and self.matrix[2, 0] == 0:
                 self.estacionado = False
-                self.tupla = (0.0, -0.6)
+                self.tupla = (0.0, -0.3)
                 self.estado = 'Derecha'
                 self.giro = 'der'
                 self.veces_derecha += 1
@@ -173,7 +189,7 @@ class LineaPublisher(Node):
             # Izquierda
             elif self.matrix[0, 0] == 1 and self.matrix[0, 6] == 0:
                 self.estacionado = False
-                self.tupla = (0.0, 0.4)
+                self.tupla = (0.0, 0.1)
                 self.estado = 'Izquierda'
                 self.giro = 'izq'
                 self.veces_izquierda += 1
@@ -181,7 +197,7 @@ class LineaPublisher(Node):
             # Izquierda 2
             elif self.matrix[1, 0] == 1 and self.matrix[1, 6] == 0:
                 self.estacionado = False
-                self.tupla = (0.0, 0.5)
+                self.tupla = (0.0, 0.2)
                 self.estado = 'Izquierda'
                 self.giro = 'izq'
                 self.veces_izquierda += 1
@@ -189,7 +205,7 @@ class LineaPublisher(Node):
             # Izquierda 3
             elif self.matrix[2, 0] == 1 and self.matrix[2, 6] == 0:
                 self.estacionado = False
-                self.tupla = (0.0, 0.6)
+                self.tupla = (0.0, 0.3)
                 self.estado = 'Izquierda'
                 self.giro = 'izq'
                 self.veces_izquierda += 1            
@@ -197,13 +213,13 @@ class LineaPublisher(Node):
             # Recto
             elif self.matrix[0, 3] == 1 and self.matrix[0, 0] == 0 and self.matrix[0, 6] == 0:
                 self.estacionado = False
-                self.tupla = (0.5, 0.0)
+                self.tupla = (0.7, 0.0)
                 self.estado = 'Recto'
             
             # Recto
             elif self.matrix[0, 0] == 1 and self.matrix[0, 6] == 1:
                 self.estacionado = False
-                self.tupla = (0.5, 0.0)
+                self.tupla = (0.7, 0.0)
                 self.estado = 'Recto'
                 
             # 180º
@@ -212,10 +228,10 @@ class LineaPublisher(Node):
                     self.matrix[6, 3] == 1:
                 self.estacionado = False
                 if self.giro == 'izq':
-                    self.tupla = (0.0, 1.0)
+                    self.tupla = (0.0, 1.5)
                     self.estado = '+180º'
                 elif self.giro == 'der':
-                    self.tupla = (0.0, -1.0)
+                    self.tupla = (0.0, -1.5)
                     self.estado = '-180º'
                     
             # Intersección a izquierda
@@ -235,10 +251,10 @@ class LineaPublisher(Node):
                 todos_cero = np.all(self.matrix == 0)
                 if todos_cero:
                     if self.giro == 'izq':
-                        self.tupla = (0.0, 1.0)
+                        self.tupla = (0.0, 1.5)
                         self.estado = '+180º'
                     elif self.giro == 'der':
-                        self.tupla = (0.0, -1.0)
+                        self.tupla = (0.0, -1.5)
                         self.estado = '-180º'
 
             # Publish tuple data
