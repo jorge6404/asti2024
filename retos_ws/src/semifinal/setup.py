@@ -25,7 +25,8 @@ setup(
             'siguelineas = semifinal.siguelineas_puntos:main',
             'siguelineas2 = semifinal.siguelineas_alemany:main',
             'keyboard_teleop = semifinal.keyboard_teleop:main',
-            'rectificador = semifinal.rectificador:main',
+             'siguelineas_matriz = semifinal.siguelineas_matriz:main',
+            'rectificador = semifinal.rectificador:main'
         ],
     },
 )
