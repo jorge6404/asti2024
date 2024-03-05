@@ -1,6 +1,9 @@
 # UJI ROBOTICS - ASTI2024
 
+
 ## Compilación
+
+(Solo hacer si no funciona el ros2 run de algo, acordarse también de hacer los sources después de cada colcon)
 
 MOTORES
 
@@ -17,6 +20,30 @@ MOTORES
 `colcon build --symlink-install --packages-select bringup movement`  
 `source install/setup.bash`
 
+
+
+## Ejecución
+
+MOTORES
+
+Terminal 1 (Donde se ha compilado todo):  
+`ros2 run bringup motor_vel_controller`
+
+En caso de fallo:  
+`sudo usermod -aG dialout <linux_account>`  
+`sudo chmod 777 /dev/ttyUSB0`  
+`ros2 run bringup motor_vel_controller /dev/ttyUSB0`   (usar `ls /dev/ttyUSB*` para verlo)  
+Reiniciar la controladora de motores.  
+Cambiar el usb de sitio.
+
+Terminal 2:   
+`source /opt/ros/foxy/setup.bash`  
+`source install/setup.bash`  
+`ros2 run semifinal siguelineas`  (o laberinto)
+
+
+
+
 PRUEBAS
 
 `cd ../retos_ws`
@@ -31,32 +58,18 @@ PRUEBAS
 `colcon build --symlink-install --packages-select semifinal`  
 `source install/setup.bash`
 
-## Ejecución
-
-MOTORES
-
-Terminal 1 (Donde se ha compilado todo):  
-`ros2 run bringup motor_controller`
-
-En caso de fallo:  
-`sudo usermod -aG dialout <linux_account>`  
-`sudo chmod 777 /dev/ttyUSB0`  
-`ros2 run bringup motor_controller /dev/ttyUSB0`   (usar `ls /dev/ttyUSB*` para verlo)  
-Reiniciar la controladora de motores.  
-Cambiar el usb de sitio.
 
 
-Terminal 2:   
-`source /opt/ros/foxy/setup.bash`  
-`source install/setup.bash`  
-`ros2 run movement vel_controller`  
-(El traductor a velocidad lineal y angular)
 
 
-Terminal 3:  (Ejecutar)  
-`source /opt/ros/foxy/setup.bash`  
-`source install/setup.bash`  
-`ros2 run semifinal siguelineas`  (o laberinto)
+
+
+
+
+
+
+
+
 
 
 ### Otros
@@ -67,3 +80,4 @@ Terminal 3:  (Ejecutar)
 (Id puede ser 1 o 2, y velocity puede ser + o -)
 
 `ros2 run movement keyboard_teleop`
+
