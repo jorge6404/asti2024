@@ -4,10 +4,12 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Int32
 from geometry_msgs.msg import Twist
-from semifinal.misfunciones import *
+#from semifinal.misfunciones import *
 
 from sensor_msgs.msg import Image  # Image is the message type
 from cv_bridge import CvBridge  # Package to convert between ROS and OpenCV Images
+
+import keyboard
 
 
 class DetectLinea(Node):
@@ -63,6 +65,7 @@ class DetectLinea(Node):
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
+
 
     def publishcamara(self, img):
         self.publiscam_.publish(self.br.cv2_to_imgmsg(img))
@@ -133,7 +136,7 @@ class DetectLinea(Node):
                 # Mantener la trayectoria recta (si no hay memoria de giro previo)
                 print("Mantener la trayectoria recta")
                 self.publish_velocity((0.1, 0.0))
-                time.sleep(1)
+                #time.sleep(1)
             elif self.memoria == 1:
                 # Girar hacia la izquierda (usando la memoria de giro previa)
                 self.publish_velocity((0.0, -self.contador))
@@ -210,8 +213,8 @@ class DetectLinea(Node):
             # Calcular la suma de puntos en la columna central y la diferencia de posiciones
             suma_central, diferencia = self.calcular_diferencia_puntos(puntos)
             # Imprimir información sobre la suma de puntos y la diferencia de posiciones
-            print("Suma en columna central:", suma_central)
-            print("Diferencia de posiciones:", diferencia)
+            #print("Suma en columna central:", suma_central)
+            #print("Diferencia de posiciones:", diferencia)
 
             # Realizar el movimiento del robot en base a la suma de puntos y la diferencia de posiciones
             self.movimiento(suma_central, diferencia)
@@ -222,11 +225,49 @@ class DetectLinea(Node):
                 self.publishcamara(img)
             else:
                 #cv2.imshow("Result", resultado)
+                #print("Mostrando imagen")
                 cv2.imshow("Video", img)
 
             # Esperar a que se presione la tecla 'q' para salir del bucle
-            if cv2.waitKey(1) & 0xFF == ord('q'):
+            """
+
+            if cv2.waitKey(1) & 0xFF == ord('s'):
+                print("\n\n\n\n")
+                self.publish_velocity((0.0, 0.0))
+    
+            if cv2.waitKey(1) & 0xFF == ord('w'):
+                print("\n\n\n\n")
+                self.memoria = 0
+                self.publish_velocity((0.1, 0.0))
+    
+            if cv2.waitKey(1) & 0xFF == ord('a'):
+                self.memoria = -1
+                print("\n\n\n\n")
+                self.publish_velocity((0.0, -0.5))
+    
+            if cv2.waitKey(1) & 0xFF == ord('d'):
+                self.memoria = 1
+                print("\n\n\n\n")
+                self.publish_velocity((0.0, 0.5))
+    
+            """
+
+            if keyboard.is_pressed('s'):
+                self.memoria = 0
+            if keyboard.is_pressed('a'):
+                self.memoria = -1
+            if keyboard.is_pressed('d'):
+                self.memoria = 1
+            if keyboard.is_pressed('w'):
+                self.memoria = 0
+            if keyboard.is_pressed('q'):
+                print("Saliendo del bucle principal")
                 break
+
+        self.cap.release()
+        cv2.destroyAllWindows()
+        super().destroy_node()
+        rclpy.shutdown()
 
 
 def menu():
