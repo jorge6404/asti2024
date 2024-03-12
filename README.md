@@ -61,14 +61,13 @@ PRUEBAS
 
 
 
+## Conexión wifi
 
-
-
-
-
-
-
-
+- Conectarse al router PIROBOTNET
+- conectar robot
+- ssh pi@192.168.0.114
+- qwerty
+- estamos dentro
 
 
 

@@ -24,7 +24,9 @@ class Linea_sub(Node):
 
         # Display image
         cv2.imshow("camera", img)
-        cv2.waitKey(1)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            #self.publish_velocity((0.0, 0.0))
+            print("\n\n\n\n")
 
 
 def main(args=None):
