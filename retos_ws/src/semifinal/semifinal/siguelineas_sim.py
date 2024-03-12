@@ -20,6 +20,10 @@ class LineaPublisher(Node):
         self.black_threshold = 40
         self.vid = cv2.VideoCapture(2)
         #self.vid = cv2.VideoCapture('/home/alemany/asti2024/retos_ws/src/semifinal/semifinal/video.mp4')
+        self.subscription = self.create_subscription(Image, '/camera/image_raw', self.listener_callback, 10)
+        self.subscription
+
+        self.br = CvBridge()
 
         self.estacionado = True
         self.giro = "der"
@@ -27,9 +31,15 @@ class LineaPublisher(Node):
         self.estado = 'Estacionado'
         self.veces_izquierda = 0
         self.veces_derecha = 0
-
-    def timer_callback(self):
+        self.frame = 0
+        
+    def listener_callback(self, msg):
+        self.get_logger().info('Receiving video frame')
+        self.frame = self.br.imgmsg_to_cv2(msg)
         self.run()
+
+    #def timer_callback(self):
+    #    self.run()
 
     def check_for_black(self, region):
         return np.any(region < self.black_threshold)
@@ -58,7 +68,7 @@ class LineaPublisher(Node):
     def activate_camera(self):
         while True:
             try:
-                ret, frame = self.vid.read()
+                frame = self.frame
                 rows, cols, _ = frame.shape
             except AttributeError:
                 break
