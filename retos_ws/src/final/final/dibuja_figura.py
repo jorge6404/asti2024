@@ -1,44 +1,72 @@
 #!/usr/bin/env python3
+# TODO: Implementar giros con "Movements.py" en lugar de hacerlo manualmente?
 
-MODO_TESTEO=True
+CON_GPIO=False   # Cambiar a True si se está ejecutando en la Raspberry Pi con el motor de la herramienta
 
 # Import the necessary ROS2 libraries
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
-
-# Import GPIO for Raspberry Pi
-if not MODO_TESTEO:
+if CON_GPIO:
   import RPi.GPIO as GPIO
 import time
 from math import pi
+from .Movements import Movements
 
-# Constantes
-SERVO_PIN = 12
+SERVO_PIN = 12 
 FRECUENCIA = 50
 SLEEP_TIME_BOLI = 0.5
 SLEEP_TIME_MOVIMIENTO = 0.1
 
+VELOCIDAD_LINEAL = 0.1
+VELOCIDAD_ANGULAR = 0.5
+
+
 
 # Servo y GPIO
 def init_servo():
-  # GPIO.setwarnings(False)
-  GPIO.setmode(GPIO.BOARD)
-  GPIO.setup(12, GPIO.OUT)
-  servo = GPIO.PWM(12, 50)
-  servo.start(0)
-  return servo
+  if CON_GPIO:
+    print("Inicializando servo")
+    GPIO.setmode(GPIO.BOARD)
+    GPIO.setup(SERVO_PIN, GPIO.OUT)
+    servo = GPIO.PWM(SERVO_PIN, FRECUENCIA)
+    servo.start(0)
+    time.sleep(1)   # Esperar a que el servo se inicialice
+    print("Servo inicializado correctamente")
+    return servo
+  else:
+    print("Servo no detectado para inicializarlo.")
+    return None
 
-# Nodo, publicador y mensaje
-def init_ros():
-  rclpy.init(args=None)
-  node = rclpy.create_node('figuras')
-  cmd_vel_pub = node.create_publisher(Twist, '/cmd_vel', 10)
-  cmd_vel_msg = Twist()
-  return node, cmd_vel_pub, cmd_vel_msg
+def parar_servo(servo):
+  if CON_GPIO:
+    print("Parando servo")
+    servo.ChangeDutyCycle(2+(120/18))
+    servo.stop()
+    GPIO.cleanup()
+  else:
+    print("Servo no detectado para pararlo.")
+  
+def subir_boli(servo):
+  if CON_GPIO:
+    print("Subiendo boli")
+    servo.ChangeDutyCycle(2+(110/18))       # TODO: Revisar valores y cambiar posiciones servos
+  else:
+    print("Boli no detectado para subrirlo.")
+  time.sleep(SLEEP_TIME_BOLI)
 
-def get_figure_params():
-  figura = int(input("Figura (1: Triangulo, 2: Cuadrado, 3: Rectangulo): "))
+def bajar_boli(servo):
+  if CON_GPIO:
+    print("Bajando boli")
+    servo.ChangeDutyCycle(2+(130/18))
+  else:
+    print("Boli no detectado para bajarlo.")
+  time.sleep(SLEEP_TIME_BOLI)
+
+
+def get_figure_params(opcion_menu):
+  figura = int(opcion_menu)
+  
   if figura == 1: # Triangulo
     angulo = 2.09439510 # 2pi/3
     largo = 0.25
@@ -58,92 +86,96 @@ def get_figure_params():
     raise ValueError("Invalid figure")
   return angulo, largo, ancho, lados
 
+def pedir_opcion_menu():
+  print("\nFiguras principales")
+  print(" 1. Triangulo")
+  print(" 2. Cuadrado")
+  print(" 3. Rectangulo")
+  print("\nPruebas:")
+  print(" a. Prueba de movimiento")
+  print(" s. Subir boli")
+  print(" d. Bajar boli")
+  print(" f. Reiniciar servo")
+  print(" q. Salir")
+  
+  return input("Seleccione una opcion: ")
+
+def dibujar_figura(servo, mov: Movements, opcion_menu):
+  angulo, largo, ancho, lados = get_figure_params(opcion_menu)
+  
+  bajar_boli(servo)
+  
+  for i in range(lados):
+    if i % 2:
+        distancia = largo
+    else:
+        distancia = ancho
+    
+    # Move forward
+    print("Moviendo hacia adelante")
+    for linear_iterations in range(int(distancia / (abs(VELOCIDAD_LINEAL) * 0.1))):
+        mov.avanzar()
+        time.sleep(SLEEP_TIME_MOVIMIENTO)
+
+    mov.detener()
+    subir_boli(servo)
+
+    # Move forward 16cm
+    print("Moviendo hacia adelante")
+    for linear_iterations in range(int(0.2 / (abs(VELOCIDAD_LINEAL) * 0.1))):
+        mov.avanzar()
+        time.sleep(SLEEP_TIME_MOVIMIENTO)
+
+    mov.detener()
+
+    # Turn
+    print("Girando")
+    for angular_iterations in range(int(angulo / (abs(VELOCIDAD_ANGULAR) * 0.1))):
+        mov.girar_izquierda()
+        time.sleep(SLEEP_TIME_MOVIMIENTO)
+
+    mov.detener()
+
+    # Move backward 16cm
+    print("Moviendo hacia atras")
+    for linear_iterations in range(int(0.15 / (abs(VELOCIDAD_LINEAL) * 0.1))):
+        mov.retroceder()
+        time.sleep(SLEEP_TIME_MOVIMIENTO)
+
+    mov.detener()
+    bajar_boli(servo)
+
+
 
 def main():
-  if not MODO_TESTEO:
-    servo = init_servo()
-  node, cmd_vel_pub, cmd_vel_msg = init_ros()
-  angulo, largo, ancho, lados = get_figure_params()
-
-  if not MODO_TESTEO:
-    servo.ChangeDutyCycle(2+(130/18))
-  else:
-    print("Bajando boli (??)")
+  servo = init_servo()
+  
+  rclpy.init(args=None)
+  node = rclpy.create_node('figuras')
+  mov = Movements()
+  mov.actualizar_velocidades(VELOCIDAD_LINEAL, VELOCIDAD_ANGULAR, 0.01, 0.1)    # TODO: Aceleraciones mejorar
+  
+  while True:
+    opcion_menu = pedir_opcion_menu()
     
-  velocidad_lineal = -0.1
-  velocidad_angular = 0.2
+    # Testeos
+    if opcion_menu == 'a':
+      mov.prueba_movimientos()
+    elif opcion_menu == 's':
+      subir_boli(servo)
+    elif opcion_menu == 'd':
+      bajar_boli(servo)
+    elif opcion_menu == 'f':
+      parar_servo(servo)
+      servo = init_servo()
+    elif opcion_menu == 'q':
+      break
+    # Dibujar figura
+    elif opcion_menu in ['1', '2', '3']:  # Triangulo, cuadrado, rectangulo
+      dibujar_figura(servo, mov, opcion_menu)
+    else:
+      print("Opcion no valida, 'q' para salir")
 
-  for i in range(lados):
-      if i % 2:
-          distancia = largo
-      else:
-          distancia = ancho
-      
-      # Move forward
-      print("Moviendo hacia adelante")
-      for linear_iterations in range(int(distancia / (abs(velocidad_lineal) * 0.1))):
-          cmd_vel_msg.linear.x = velocidad_lineal
-          cmd_vel_msg.angular.z = 0.0
-          cmd_vel_pub.publish(cmd_vel_msg)
-          time.sleep(SLEEP_TIME_MOVIMIENTO)
-
-      cmd_vel_msg.linear.x = 0.0
-      cmd_vel_msg.angular.z = 0.0
-      cmd_vel_pub.publish(cmd_vel_msg)
-
-      # Pen up
-      if not MODO_TESTEO:
-        servo.ChangeDutyCycle(2+(110/18))
-      else:
-        print("Subiendo boli")
-      time.sleep(SLEEP_TIME_BOLI)
-
-      # Move forward 16cm
-      print("Moviendo hacia adelante")
-      for linear_iterations in range(int(0.2 / (abs(velocidad_lineal) * 0.1))):
-          cmd_vel_msg.linear.x = velocidad_lineal
-          cmd_vel_msg.angular.z = 0.0
-          cmd_vel_pub.publish(cmd_vel_msg)
-          time.sleep(SLEEP_TIME_MOVIMIENTO)
-
-      cmd_vel_msg.linear.x = 0.0
-      cmd_vel_msg.angular.z = 0.0
-      cmd_vel_pub.publish(cmd_vel_msg)
-
-      # Turn
-      print("Girando")
-      for angular_iterations in range(int(angulo / (abs(velocidad_angular) * 0.1))):
-          cmd_vel_msg.linear.x = 0.0
-          cmd_vel_msg.angular.z = velocidad_angular
-          cmd_vel_pub.publish(cmd_vel_msg)
-          time.sleep(SLEEP_TIME_MOVIMIENTO)
-
-      cmd_vel_msg.linear.x = 0.0
-      cmd_vel_msg.angular.z = 0.0
-      cmd_vel_pub.publish(cmd_vel_msg)
-
-      # Move backward 16cm
-      print("Moviendo hacia atras")
-      for linear_iterations in range(int(0.15 / (abs(velocidad_lineal) * 0.1))):
-          cmd_vel_msg.linear.x = -velocidad_lineal
-          cmd_vel_msg.angular.z = 0.0
-          cmd_vel_pub.publish(cmd_vel_msg)
-          time.sleep(SLEEP_TIME_MOVIMIENTO)
-
-      cmd_vel_msg.linear.x = 0.0
-      cmd_vel_msg.angular.z = 0.0
-      cmd_vel_pub.publish(cmd_vel_msg)
-
-      # Bajar boli
-      if not MODO_TESTEO:
-        servo.ChangeDutyCycle(2+(130/18))
-      else:
-        print("Bajando boli")
-      time.sleep(SLEEP_TIME_BOLI)
-      
-  if not MODO_TESTEO:
-    servo.ChangeDutyCycle(2+(120/18))
-    servo.stop()
-    GPIO.cleanup()
-
+  mov.detener()
+  parar_servo(servo)
   rclpy.shutdown()

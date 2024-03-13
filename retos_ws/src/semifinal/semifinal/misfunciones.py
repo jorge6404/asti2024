@@ -1,10 +1,7 @@
-import rclpy
-from rclpy.node import Node
-from rclpy.executors import SingleThreadedExecutor
-from geometry_msgs.msg import Twist
+# FICHERO DESACTUALIZADO, VER EL FICHERO MOVIMIENTOS.PY EN LA CARPETA DE LA FINAL
+
 import time
 import math
-
 
 # -------- FUNCIONES AUXILIARES ----------------
 
