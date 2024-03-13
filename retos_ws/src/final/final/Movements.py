@@ -149,6 +149,8 @@ class Movements(Node):
 
 
     def girar_grados(self, degrees, direccion, radio=0.0):
+        # TODO: Testear que está bien, ya que no lo he probado
+        
         """Rotar el robot en un angulo determinado
 
         Args:
