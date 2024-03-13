@@ -4,6 +4,32 @@ import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
 
+'''
+Lo interesante de esto, es el hecho de poder simplificar mucho más el código, y no tener que estar preocupándonos por las velocidades, aceleraciones...  
+Esto ya estaba más o menos implementado antes, pero ahora está mejor organizado y más fácil de usar.
+
+Ejemplo:
+
+from .Movements import Movements
+mov = Movements()
+
+# Queremos probar si el robot hace todos los movimientos correctamente?:
+mov.prueba_movimientos()
+
+#Queremos ejecutar movimientos básicos?:
+mov.avanzar()
+mov.detener()
+mov.girar_izquierda()
+mov.girar_derecha()
+
+# Queremos ejecutar más movimientos avanzados, en base a distancias, radios, etc?:
+mov.avanzar_distancia(distancia_total=1)
+girar_grados(self, degrees=90, direccion=izq, radio=1)
+
+# Va muy rápido el robot para la prueba concreta, y queremos una aceleración más progresiva para cualquier movimiento?
+mov.actualizar_velocidades(self, max_linear_vel=0.1, max_angular_vel=1, linear_acc=0.01, angular_acc=0.1):
+'''
+
 class Movements(Node):
     def __init__(self):
         """
