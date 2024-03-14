@@ -21,6 +21,8 @@ setup(
     entry_points={
         'console_scripts': [
             'dibuja_figura = final.dibuja_figura:main',
+            'siguelineas_sim = final.siguelineas_sim:main',
+            'siguelineas_matriz = final.siguelineas_matriz:main',
         ],
     },
 )
