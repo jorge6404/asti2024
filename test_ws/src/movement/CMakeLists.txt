@@ -27,8 +27,8 @@ find_package(custom_interfaces REQUIRED)
 add_executable(ejemplo src/ejemplo.cpp)
 ament_target_dependencies(ejemplo rclcpp)
 
-add_executable(subscriber_member_function src/subscriber_member_function.cpp)
-ament_target_dependencies(subscriber_member_function rclcpp geometry_msgs)
+# add_executable(subscriber_member_function src/subscriber_member_function.cpp)
+# ament_target_dependencies(subscriber_member_function rclcpp geometry_msgs)
 
 add_executable(keyboard_teleop src/keyboard_teleop.cpp)
 ament_target_dependencies(keyboard_teleop rclcpp custom_interfaces)
@@ -39,7 +39,7 @@ ament_target_dependencies(vel_controller rclcpp custom_interfaces geometry_msgs)
 # Install cpp executables
 install(TARGETS
   ejemplo
-  subscriber_member_function
+  # subscriber_member_function
   keyboard_teleop
   vel_controller
   DESTINATION lib/${PROJECT_NAME})

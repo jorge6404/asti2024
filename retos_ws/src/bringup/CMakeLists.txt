@@ -24,12 +24,12 @@ find_package(geometry_msgs REQUIRED)
 
 include_directories(include)
 
-add_executable(motor_controller src/motor_controller.cpp)
-ament_target_dependencies(motor_controller 
-  rclcpp
-  dynamixel_sdk
-  custom_interfaces
-)
+# add_executable(motor_controller src/motor_controller.cpp)
+# ament_target_dependencies(motor_controller 
+#   rclcpp
+#   dynamixel_sdk
+#   custom_interfaces
+# )
 
 add_executable (motor_vel_controller src/motor_vel_controller.cpp)
 ament_target_dependencies(motor_vel_controller
@@ -39,8 +39,11 @@ ament_target_dependencies(motor_vel_controller
   geometry_msgs
 )
 
+add_executable(keyboard_teleop src/keyboard_teleop.cpp)
+ament_target_dependencies(keyboard_teleop rclcpp custom_interfaces)
+
 install(TARGETS
-  motor_controller
+  keyboard_teleop
   motor_vel_controller
   DESTINATION lib/${PROJECT_NAME}
 )

@@ -4,18 +4,19 @@
 //
 //                         * Enable USB port access *
 // >> sudo usermod -aG dialout <linux_account>
+//                           (Restart your computer)
 //
 //                               * Start node *
 // >> ros2 run bringup motor_controller
-//       if it doesnt work, try:
-//      >> ros2 run bringup motor_controller <device_name>
+//
+// if it doesnt work, try:
+// >> ros2 run bringup motor_controller <device_name>
 //         - Optional argument (default: /dev/ttyUSB0)
 //         - Use ls /dev/ttyUSB* to find the correct device name
 //         - Use sudo chmod 777 /dev/ttyUSB0 to give permissions
 //
-//             * Send SetVelocity messages to /set_velocity topic *
-//                             1 unit = 0.229 rpm
-// >> ros2 topic pub -1 /set_velocity custom_interfaces/SetVelocity "{id: 1, velocity: 500}"
+//             * Send Twist messages to /cmd_vel topic *
+// >> ros2 topic pub -1 /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.2, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.1}}"
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -25,13 +26,13 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "dynamixel_sdk/dynamixel_sdk.h"
-#include "custom_interfaces/msg/set_velocity.hpp"
 #include "custom_interfaces/srv/get_velocity.hpp"
+#include "geometry_msgs/msg/twist.hpp"
 #include "rcutils/cmdline_parser.h" // Dynamixel SDK
 
-#include "motor_controller.hpp"
+#include "motor_vel_controller.hpp"
 
-// Control table for Dynamixel XM540-W270-T/R
+// Control table for Dynamixel X Series
 #define ADDR_OPERATING_MODE 11 // 1 for velocity control | 3 for position control
 #define ADDR_TORQUE_ENABLE 64 // 0 for torque off | 1 for torque on
 #define ADDR_GOAL_VELOCITY 104
@@ -40,16 +41,26 @@
 // Protocol version
 #define PROTOCOL_VERSION 2.0
 
-// Default setting
+// Default settings
 #define BAUDRATE 115200 // 57600 Default baudrate
 #define DEFAULT_DEVICE_NAME "/dev/ttyUSB0" // ls /dev/ttyUSB* to find the correct device name
+
+// Robot parameters
+#define VELOCITY_UNIT 0.229 // rpm | See https://emanual.robotis.com/docs/en/dxl/x/xl330-m077/#velocity-limit for more details
+#define WHEEL_DIAMETER 0.068 // meters
+#define WHEEL_SEPARATION 0.172 // meters
 
 dynamixel::PortHandler *portHandler;
 dynamixel::PacketHandler *packetHandler;
 
 uint8_t dxl_error = 0;
-uint32_t goal_velocity = 0;
+uint32_t right_wheel_velocity = 0;
+uint32_t left_wheel_velocity = 0;
 int dxl_comm_result = COMM_TX_FAIL;
+constexpr double pi = 3.141592653589793;
+
+// Unit that allows the program to convert desired robot velocity to motor velocity units
+const double distance_unit = 1 / (pi * VELOCITY_UNIT * WHEEL_DIAMETER / 60);
 
 
 MotorController::MotorController()
@@ -64,24 +75,39 @@ MotorController::MotorController()
    const auto QOS_RKL10V = // Defines QoS
    rclcpp::QoS(rclcpp::KeepLast(qos_depth)).reliable().durability_volatile();
 
-   // Subscribes to set_velocity topic and defines its callback
-   set_velocity_subscriber_ =
-      this->create_subscription<SetVelocity>(
-      "set_velocity",
+   // Subscribes to cmd_vel topic and defines its callback
+   cmd_vel_subscriber_ =
+      this->create_subscription<Twist>(
+      "cmd_vel",
       QOS_RKL10V,
-      [this](const SetVelocity::SharedPtr msg) -> void {
+      [this](const Twist::SharedPtr msg) -> void {
          uint8_t dxl_error = 0;
 
-         // Velocity value
-         uint32_t goal_velocity = (unsigned int)msg->velocity;
+         // Read linear and angular goal velocities
+         double linear_velocity = msg->linear.x;
+         double angular_velocity = msg->angular.z;
 
-         // Send goal velocity (4 bytes) to the DYNAMIXEL
+         // Calculate right and left wheel velocities
+         if (angular_velocity == 0) {
+            right_wheel_velocity = linear_velocity * distance_unit;
+            left_wheel_velocity = linear_velocity * distance_unit;
+         } else {
+            if (angular_velocity > 0) {
+               right_wheel_velocity = (angular_velocity * (linear_velocity + WHEEL_SEPARATION / 2)) * distance_unit;
+               left_wheel_velocity = (angular_velocity * (linear_velocity - WHEEL_SEPARATION / 2)) * distance_unit;
+            } else {
+               right_wheel_velocity = (-angular_velocity * (linear_velocity - WHEEL_SEPARATION / 2)) * distance_unit;
+               left_wheel_velocity = (-angular_velocity * (linear_velocity + WHEEL_SEPARATION / 2)) * distance_unit;
+            }
+         }
+
+         // Send goal velocity (4 bytes) to each one of the DYNAMIXELs
          dxl_comm_result =
          packetHandler->write4ByteTxRx(
             portHandler, 
-            (uint8_t) msg->id, 
+            1, // Right wheel ID
             ADDR_GOAL_VELOCITY, 
-            goal_velocity, 
+            right_wheel_velocity, 
             &dxl_error
          );
 
@@ -90,7 +116,24 @@ MotorController::MotorController()
          } else if (dxl_error != 0) {
             RCLCPP_ERROR(this->get_logger(), "%s", packetHandler->getRxPacketError(dxl_error));
          } else {
-            RCLCPP_INFO(this->get_logger(), "Set [ID: %d] [Goal Velocity: %d]", msg->id, msg->velocity);
+            RCLCPP_INFO(this->get_logger(), "Set [ID: %d] [Goal Velocity: %d]", 1, right_wheel_velocity);
+         }
+
+         dxl_comm_result =
+         packetHandler->write4ByteTxRx(
+            portHandler, 
+            2, // Left wheel ID
+            ADDR_GOAL_VELOCITY, 
+            left_wheel_velocity, 
+            &dxl_error
+         );
+
+         if (dxl_comm_result != COMM_SUCCESS) {
+            RCLCPP_ERROR(this->get_logger(), "%s", packetHandler->getTxRxResult(dxl_comm_result));
+         } else if (dxl_error != 0) {
+            RCLCPP_ERROR(this->get_logger(), "%s", packetHandler->getRxPacketError(dxl_error));
+         } else {
+            RCLCPP_INFO(this->get_logger(), "Set [ID: %d] [Goal Velocity: %d]", 1, left_wheel_velocity);
          }
       }
    );
