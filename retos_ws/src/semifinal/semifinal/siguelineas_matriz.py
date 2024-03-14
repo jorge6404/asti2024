@@ -18,7 +18,7 @@ class LineaPublisher(Node):
         self.tupla = (0.0, 0.0)
         self.matrix = np.zeros((7, 7), dtype=int)
         self.black_threshold = 40
-        self.vid = cv2.VideoCapture(2)
+        self.vid = cv2.VideoCapture(0)
         #self.vid = cv2.VideoCapture('/home/alemany/asti2024/retos_ws/src/semifinal/semifinal/video.mp4')
 
         self.estacionado = True

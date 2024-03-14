@@ -3,127 +3,50 @@ import numpy as np
 from time import sleep
 import rclpy
 from rclpy.node import Node
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge
 from geometry_msgs.msg import Twist
 from semifinal.misfunciones import *
 
-class LineaPublisher(Node):
+class Linea_Sub_Publisher(Node):
 
     def __init__(self):
-        super().__init__('linea_publisher')
+        super().__init__('linea_sub_publisher')
         self.publisher_ = self.create_publisher(Twist, 'cmd_vel', 10)
         self.publisher_
-        timer_period = 0.01  # seconds
-        self.timer = self.create_timer(timer_period, self.timer_callback)
-
-        self.tupla = (0.0, 0.0)
-        self.matrix = np.zeros((7, 7), dtype=int)
-        self.black_threshold = 40
-        self.vid = cv2.VideoCapture(2)
-        #self.vid = cv2.VideoCapture('/home/alemany/asti2024/retos_ws/src/semifinal/semifinal/video.mp4')
         self.subscription = self.create_subscription(Image, '/camera/image_raw', self.listener_callback, 10)
-        self.subscription
-
         self.br = CvBridge()
-
+        self.img = None  # Adding an instance variable for storing the image
         self.estacionado = True
         self.giro = "der"
         self.counter = 50
         self.estado = 'Estacionado'
         self.veces_izquierda = 0
         self.veces_derecha = 0
-        self.frame = 0
-        
+        self.black_threshold = 30
+        self.tupla = (0.0, 0.0)
+        self.matrix = np.zeros((7, 7), dtype=int)
+
     def listener_callback(self, msg):
         self.get_logger().info('Receiving video frame')
-        self.frame = self.br.imgmsg_to_cv2(msg)
-        self.run()
 
-    #def timer_callback(self):
-    #    self.run()
+        # Convert ROS Image message to OpenCV image
+        self.img = self.br.imgmsg_to_cv2(msg)
+        cv2.waitKey(1)
+        self.run(self.img)
 
     def check_for_black(self, region):
         return np.any(region < self.black_threshold)
 
     # MENÚ            
-    def run(self):
-        print("Menu:")
-        print("1. Activar cámara sin procesamiento de imagen")
-        print("2. Mover el robot")
-        print("3. Ejecutar código existente")
-
-        choice = input("Selecciona una opción (presiona 'q' para detener): ")
-
-        if choice == 'q':
-            self.stop_video_capture()
-        elif choice == '1':
-            self.activate_camera()
-        elif choice == '2':
-            self.move_robot()
-        elif choice == '3':
-            self.line_follower()
-        else:
-            print("Opción no válida. Inténtalo de nuevo.")
-
-    # OPCIÓN 1: MOSTRAR CÁMARA
-    def activate_camera(self):
-        while True:
+    def run(self, img):
+        
             try:
-                frame = self.frame
+                frame = self.img
                 rows, cols, _ = frame.shape
             except AttributeError:
-                break
-            cell_size_x = cols // 7
-            cell_size_y = rows // 7
-            for i in range(7):
-                for j in range(7):
-                    roi = frame[i * cell_size_y:(i + 1) * cell_size_y, j * cell_size_x:(j + 1) * cell_size_x]
-                    if self.check_for_black(roi):
-                        self.matrix[i, j] = 1
-                    else:
-                        self.matrix[i, j] = 0
-
-            cv2.imshow('frame', frame)
+                return
             
-            # Dibujar líneas horizontales
-            for i in range(1, 7):
-                cv2.line(frame, (0, i * cell_size_y), (cols, i * cell_size_y), (0, 255, 0), 1)
-
-	    # Dibujar líneas verticales
-            for j in range(1, 7):
-                cv2.line(frame, (j * cell_size_x, 0), (j * cell_size_x, rows), (0, 255, 0), 1)
-
-            cv2.imshow('frame', frame)
-            if cv2.waitKey(10) & 0xFF == ord('q'):
-                break
-
-    # OPCIÓN 2: MOVER ROBOT
-    def move_robot(self):
-        moves = [(0.0, 1.0), (0.0, -1.0), (0.1, 0.0), (-0.1, 0.0)]
-
-        for move in moves:
-            self.tupla = move
-            sleep(1)
-            msg = Twist()
-            msg.linear.x = self.tupla[0]
-            msg.angular.z = self.tupla[1]
-            self.publisher_.publish(msg)
-            self.get_logger().info(f'Publishing: velocity="({msg.linear.x}, {msg.angular.z})"')
-            self.tupla = (0.0, 0.0)
-            sleep(1)
-            msg = Twist()
-            msg.linear.x = self.tupla[0]
-            msg.angular.z = self.tupla[1]
-            self.publisher_.publish(msg)
-            self.get_logger().info(f'Publishing: velocity="({msg.linear.x}, {msg.angular.z})"')
-    
-    # OPCIÓN 3: SIGUELINEAS (cambio nombre función para mayor aclaración)
-    def line_follower(self):
-        while True:
-            try:
-                ret, frame = self.vid.read()
-                rows, cols, _ = frame.shape
-            except AttributeError:
-                break
 
             cell_size_x = cols // 7
             cell_size_y = rows // 7
@@ -151,7 +74,7 @@ class LineaPublisher(Node):
             #Bobo
             if self.veces_derecha >= 3 and self.veces_izquierda >= 3: 
                 self.estacionado = False
-                self.tupla = (0.3, 0.0)
+                self.tupla = (0.2, 0.0)
                 self.estado = 'Recto'
                 self.veces_derecha = 0
                 self.veces_izquierda = 0
@@ -209,13 +132,13 @@ class LineaPublisher(Node):
             # Recto
             elif self.matrix[0, 3] == 1 and self.matrix[0, 0] == 0 and self.matrix[0, 6] == 0:
                 self.estacionado = False
-                self.tupla = (0.3, 0.0)
+                self.tupla = (0.7, 0.0)
                 self.estado = 'Recto'
             
             # Recto
             elif self.matrix[0, 0] == 1 and self.matrix[0, 6] == 1:
                 self.estacionado = False
-                self.tupla = (0.3, 0.0)
+                self.tupla = (0.7, 0.0)
                 self.estado = 'Recto'
                 
             # 180º
@@ -261,56 +184,13 @@ class LineaPublisher(Node):
             self.publisher_.publish(msg)
             self.get_logger().info(f'Publishing: velocity="({msg.linear.x}, {msg.angular.z})"')
             
-            # PULSAMOS C PARA QUE SIGA HACIA DELANTE FORZOSAMENTE CUANDO NOS CONVENGA (LA CÁMARA SE PARA PERO EN TEORIA DEBERÍA DAR IGUAL)
-            if cv2.waitKey(10) & 0xFF == ord('w'):
-                msg = Twist()
-                msg.linear.x = 0.5
-                msg.angular.z = 0.0
-                print('Recto')
-                self.publisher_.publish(msg)
-                self.get_logger().info(f'Publishing: velocity="({msg.linear.x}, {msg.angular.z})"')
-                sleep(0.5)
-            elif cv2.waitKey(10) & 0xFF == ord('a'):
-                msg = Twist()
-                msg.linear.x = 0.0
-                msg.angular.z = 0.5
-                print('Izquierda')
-                self.publisher_.publish(msg)
-                self.get_logger().info(f'Publishing: velocity="({msg.linear.x}, {msg.angular.z})"')
-                sleep(0.5)
-            elif cv2.waitKey(10) & 0xFF == ord('d'):
-                msg = Twist()
-                msg.linear.x = 0.0
-                msg.angular.z = -0.5
-                print('Derecha')
-                self.publisher_.publish(msg)
-                self.get_logger().info(f'Publishing: velocity="({msg.linear.x}, {msg.angular.z})"')
-                sleep(0.5)
-            elif cv2.waitKey(10) & 0xFF == ord('x'):
-                msg = Twist()
-                msg.linear.x = 0.0
-                msg.angular.z = 0.0
-                print('Derecha')
-                self.publisher_.publish(msg)
-                self.get_logger().info(f'Publishing: velocity="({msg.linear.x}, {msg.angular.z})"')
-                self.vid.release()
-                cv2.destroyAllWindows()
-                rclpy.shutdown()
-            sleep(0.1)
-                
-
-    # DETENER CAPTURA IMÁGEN
-    def stop_video_capture(self):
-        self.vid.release()
-        cv2.destroyAllWindows()
-        rclpy.shutdown()
 
 
 def main(args=None):
     rclpy.init(args=args)
-    linea_pub = LineaPublisher()
-    rclpy.spin(linea_pub)
-    linea_pub.destroy_node()
+    linea_sub_pub = Linea_Sub_Publisher()
+    rclpy.spin(linea_sub_pub)
+    linea_sub_pub.destroy_node()
     rclpy.shutdown()
 
 
