@@ -21,6 +21,7 @@ setup(
     entry_points={
         'console_scripts': [
             'test_vision_gazebo = pruebas.test_vision_gazebo:main',
+            'distance_sensor = pruebas.distance_sensor:main',
         ],
     },
 )
