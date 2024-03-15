@@ -9,7 +9,9 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 from launch_ros.actions import Node
 
-
+# Si te da error de que no existe TwistMux, es porque no has instalado el paquete twist_mux
+# Para instalarlo, ejecuta el siguiente comando en la terminal:
+# sudo apt install ros-foxy-twist-mux
 
 def generate_launch_description():
 
