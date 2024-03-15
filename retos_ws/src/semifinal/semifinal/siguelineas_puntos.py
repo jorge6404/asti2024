@@ -140,11 +140,11 @@ class DetectLinea(Node):
             elif self.memoria == 1:
                 # Girar hacia la izquierda (usando la memoria de giro previa)
                 self.publish_velocity((0.0, -self.contador))
-                self.contador -= 0.05
+                self.contador -= 0.01
             elif self.memoria == -1:
                 # Girar hacia la derecha (usando la memoria de giro previa)
                 self.publish_velocity((0.0, self.contador))
-                self.contador += 0.02
+                self.contador += 0.01
 
         # Caso 2: La velocidad es negativa (girar hacia la izquierda)
         elif vel < -13:
@@ -152,7 +152,7 @@ class DetectLinea(Node):
                 # Ajustar la velocidad angular para una rotación más suave
                 print("Girar hacia la izquierda con mayor suavidad")
                 self.publish_velocity((0.0, velocidad_angular - self.contador))
-                self.contador -= 0.02
+                self.contador -= 0.01
             else:
                 # Giro estándar hacia la izquierda
                 print("Girar hacia la izquierda")
@@ -165,7 +165,7 @@ class DetectLinea(Node):
                 # Ajustar la velocidad angular para una rotación más suave
                 print("Girar hacia la derecha con mayor suavidad")
                 self.publish_velocity((0.0, -velocidad_angular + self.contador))
-                self.contador += 0.02
+                self.contador += 0.01
             else:
                 # Giro estándar hacia la derecha
                 print("Girar hacia la derecha")
