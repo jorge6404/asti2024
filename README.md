@@ -1,6 +1,6 @@
 # UJI ROBOTICS - ASTI2024
 
-## ¿Cómo ejecutar un programa ya hecho en el CyberCrex?
+## ¿Cómo ejecutar un programa ya hecho en el CyberCrex o en el portátil?
 
 ### Opción 100% Raspberry Pi
 
@@ -50,6 +50,7 @@
   - `source install/setup.bash`
   - `colcon build --symlink-install --packages-select bringup`
   - `source install/setup.bash`
+  - `colcon build --symlink-install --packages-select pruebas final`   (etc... Todos los paquetes que se quieran usarS)
 3. Ejecutar el programa deseado.
   - `ros2 run final dibuja_figura`  (En otra terminal, aquí sería donde se ejecutaría el programa deseado)
 
@@ -77,14 +78,19 @@
       ],
   },
   ```
+4. Compilar el código
+  - `colcon build --symlink-install --packages-select pruebas`
+  - `source install/setup.bash`
+
+5. No haría falta compilar cada cambio que hagamos al programa si habíamos usado --symlink-install para compilar, pero si se cambia el `setup.py` otra vez sí que habría que hacerlo.
 
 
-### Otros
+## Otros comandos
 
 `ros2 topic pub cmd_vel geometry_msgs/Twist "{linear: {x: 0.1, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}"`
 
 `ros2 topic pub -1 /set_velocity custom_interfaces/SetVelocity "{id: 1, velocity: 50}"`  
 (Id puede ser 1 o 2, y velocity puede ser + o -)
 
-`ros2 run movement keyboard_teleop`
+`ros2 run teleop_twist_keyboard teleop_twist_keyboard`
 
