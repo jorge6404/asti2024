@@ -1,7 +1,6 @@
 # UJI ROBOTICS - ASTI2024
 
-
-## ¿Cómo ejecutar un programa en el CyberCrex?
+## ¿Cómo ejecutar un programa ya hecho en el CyberCrex?
 
 ### Opción 100% Raspberry Pi
 
@@ -51,46 +50,33 @@
   - `source install/setup.bash`
   - `colcon build --symlink-install --packages-select bringup`
   - `source install/setup.bash`
+3. Ejecutar el programa deseado.
+  - `ros2 run final dibuja_figura`  (En otra terminal, aquí sería donde se ejecutaría el programa deseado)
+
+4. Si queremos probar los motores
+  - Habrá que conectar la controladora de motores al portátil con un cable USB.
+  - También habrá que dar energía a la controladora con otro USB o con una batería.  La opción del USB sería mediante un arduino que proporciona 5V.
+  - (Falta explicar mejor)
+  - Dar permisos al ordenador para controlar los motores
+  - `sudo usermod -aG dialout pi`
+  - `sudo chmod 777 /dev/ttyUSB0`  (o el puerto que sea, podría ser ttyUSB1, ttyUSB2, etc. Usar `ls /dev/ttyUSB*` para verlo)
+  - `ros2 run bringup motor_vel_controller`  (Para activar los motores, no se debe cerrar esta terminal. Asegurarse de que está los motores están bloqueados girando las ruedas con la mano)
+  - Si no funciona, cambiar el usb de sitio o ejecutar `ros2 run bringup motor_vel_controller /dev/ttyUSB0`  (o el puerto que sea, podría ser ttyUSB1, ttyUSB2, etc. Usar `ls /dev/ttyUSB*` para verlo)
 
 
-## Ejecución
+## ¿Cómo hacer un nuevo programa?
 
-MOTORES
-
-Terminal 1 (Donde se ha compilado todo):  
-`ros2 run bringup motor_vel_controller`
-
-En caso de fallo:  
-`sudo usermod -aG dialout <linux_account>`  
-`sudo chmod 777 /dev/ttyUSB0`  
-`ros2 run bringup motor_vel_controller /dev/ttyUSB0`   (usar `ls /dev/ttyUSB*` para verlo)  
-Reiniciar la controladora de motores.  
-Cambiar el usb de sitio.
-
-Terminal 2:   
-`source /opt/ros/foxy/setup.bash`  
-`source install/setup.bash`  
-`ros2 run semifinal siguelineas`  (o laberinto)
-
-
-
-
-PRUEBAS
-
-`cd ../retos_ws`
-
-(Si están las carpetas build, install y log hay que borrarlas)  
-`rm -r build`  
-`rm -r install`  
-`rm -r log`  
-
-`colcon build --packages-select custom_interfaces`  
-`source install/setup.bash`  
-`colcon build --symlink-install --packages-select semifinal`  
-`source install/setup.bash`
-
-
-
+1. Crear el programa en la carpeta `asti2024/retos_ws/src/pruebas/pruebas` (por ejemplo)
+2. Si el programa es en python, ir a `asti2024/retos_ws/src/pruebas/setup.py` y añadir el nombre del programa en la lista de `entry_points`.
+3. Ejemplo:
+  ```python
+  entry_points={
+      'console_scripts': [
+          'test_vision_gazebo = pruebas.test_vision_gazebo:main',
+          'distance_sensor = pruebas.distance_sensor:main',
+      ],
+  },
+  ```
 
 
 ### Otros
