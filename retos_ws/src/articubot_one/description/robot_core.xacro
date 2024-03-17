@@ -3,6 +3,8 @@
 
     <xacro:include filename="inertial_macros.xacro"/>
 
+    <!-- Define camera tilt angle -->
+    <xacro:property name="camera_tilt_angle" value="0.0"/>
 
     <xacro:property name="chassis_length" value="0.225"/>
     <xacro:property name="chassis_width" value="0.160"/>
@@ -18,6 +20,10 @@
     <xacro:property name="caster_wheel_mass" value="0.01"/>
     <xacro:property name="caster_wheel_offset_x" value="0.045"/>
     <xacro:property name="caster_wheel_offset_z" value="${wheel_offset_z - wheel_radius + caster_wheel_radius}"/>
+
+    <!-- Define camera tilt limits -->
+    <xacro:property name="max_camera_tilt" value="1.57"/> <!-- Maximum tilt angle in radians -->
+    <xacro:property name="min_camera_tilt" value="-1.57"/> <!-- Minimum tilt angle in radians -->
 
     <material name="white">
         <color rgba="1 1 1 1" />
@@ -56,7 +62,6 @@
     <link name="base_footprint">
     </link>
 
-
     <!-- CHASSIS LINK -->
 
     <joint name="chassis_joint" type="fixed">
@@ -84,10 +89,23 @@
         </xacro:inertial_box>
     </link>
 
-    <gazebo reference="chassis">
-        <material>Gazebo/Orange</material>
-    </gazebo>
+    <!-- Add camera joint for tilting -->
+    <joint name="camera_tilt_joint" type="continuous">
+        <parent link="chassis"/>
+        <child link="camera_tilt_link"/>
+        <origin xyz="0.257 0 0.070" rpy="0 0 ${camera_tilt_angle}"/>
+        <axis xyz="0 0 1"/>
+    </joint>
 
+    <link name="camera_tilt_link">
+        <visual>
+            <geometry>
+                <box size="0.001 0.03 0.03"/>
+            </geometry>
+            <material name="black"/>
+        </visual>
+    </link>
+    
     <!-- LEFT WHEEL LINK -->
 
     <joint name="left_wheel_joint" type="continuous">
