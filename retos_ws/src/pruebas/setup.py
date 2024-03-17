@@ -22,6 +22,7 @@ setup(
         'console_scripts': [
             'test_vision_gazebo = pruebas.test_vision_gazebo:main',
             'distance_sensor = pruebas.distance_sensor:main',
+            'nintendo_to_ros = pruebas.nintendo_to_ros:main'
         ],
     },
 )
