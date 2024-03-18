@@ -21,6 +21,8 @@ setup(
     entry_points={
         'console_scripts': [
             'test_vision_gazebo = pruebas.test_vision_gazebo:main',
+            'detect_text_pub = pruebas.detect_text_pub:main',
+            'detect_text_sub = pruebas.deetect_text_sub:main'
         ],
     },
 )
