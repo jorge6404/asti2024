@@ -19,7 +19,7 @@ class DetectLinea(Node):
         self.publisher_
 
         if camara_sub:
-            self.publiscam_ = self.create_publisher(Image, 'camera/image_raw', 10)
+            self.publiscam_ = self.create_publisher(Image, 'video_frame', 10)
             self.br = CvBridge()
 
 
