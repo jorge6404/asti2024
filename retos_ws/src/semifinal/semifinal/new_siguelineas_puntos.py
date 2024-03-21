@@ -9,66 +9,82 @@ from geometry_msgs.msg import Twist
 from sensor_msgs.msg import Image  # Image is the message type
 from cv_bridge import CvBridge  # Package to convert between ROS and OpenCV Images
 
-import keyboard
-
 
 class DetectLinea(Node):
-    def __init__(self, camara_sub=False):
+    def __init__(self, camara_sub=False, sim=False):
         super().__init__('detectar_linea')
 
         # ================== Publisher ==================
-        self.publisher_ = self.create_publisher(Twist, 'cmd_vel_vel', 10)
+        self.publisher_ = self.create_publisher(Twist, 'cmd_vel', 10)
         self.publisher_
 
         if camara_sub:
-            self.publiscam_ = self.create_publisher(Image, 'camera/image_raw', 10)
+            self.publiscam_ = self.create_publisher(Image, 'video_frame', 10)
             self.br = CvBridge()
 
 
         # ================== Subscriber ==================
-        self.subscriber_ = self.create_subscription(Int32, 'rectificar', self.listener_callback, 10)
+        self.subscriber_ = self.create_subscription(Int32, 'rectificar', self.rectificador_callback, 10)
 
-        self.subscriber_cam = self.create_subscription(Image, 'camera/image_raw', self.camara_callback, 10)
+        if sim:
+            self.subscriber_cam = self.create_subscription(Image, 'camera/image_raw', self.camara_callback, 10)
 
         timer_period = 0.001  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
         # ================== Variables ==================
+        self.sim = sim
 
-        if camara_sub:
-            self.cap = 0
+        if sim:
+            self.cap = cv2.VideoCapture(0)
         else:
             self.cap = cv2.VideoCapture(0)  # /home/jcrex/Vídeos/siguelineas_largo.mp4
             self.cap.set(3, 640)
             self.cap.set(4, 480)
+
+        self.br = CvBridge()
+
         self.divisiones = 7
 
+        # ================== Variables de control ==================
         self.contador = 0.15
+        if sim:
+            self.giro = 0.01
+        else:
+            self.giro = 0.001
         self.memoria = 0
+
 
         self.lower_blue = np.array([0, 0, 0])
         self.upper_blue = np.array([35, 35, 35])
 
         self.camara_sub = camara_sub
 
+        self.priemra_vez = True
+
+    def camara_callback(self, msg: Image):
+        #self.camara_sub = True
+        self.get_logger().info('Recibiendo video frame')
+        self.cap = self.br.imgmsg_to_cv2(msg)
+
     def timer_callback(self):
         self.detectar()
-
-    def listener_callback(self, msg: Int32):
-        self.get_logger().info(f'Recibido: {msg.data}')
-        self.memoria = msg.data
 
     def publish_velocity(self, velocity):            # velocity -->  tuple = (1, 0) (linear.x, angular.z)
         msg = Twist()
         msg.linear.x = velocity[0]
         msg.angular.z = velocity[1]
         self.publisher_.publish(msg)
-        self.get_logger().info(f'Publishing: velocity="({msg.linear.x}, {msg.angular.z})"')
+        #self.get_logger().info(f'Publishing: velocity="({msg.linear.x}, {msg.angular.z})"')
 
-    def camara_callback(self, msg: Image):
-        self.camara_sub = True
-        self.get_logger().info('Recibiendo video frame')
-        self.cap = self.br.imgmsg_to_cv2(msg)
+    def publishcamara(self, img):
+        self.publiscam_.publish(self.br.cv2_to_imgmsg(img))
+        self.get_logger().info('Publishing video frame')
+
+    def rectificador_callback(self, msg):
+        self.get_logger().info(f'Recibido: {msg.data}')
+        self.memoria = msg.data
+
 
     def camara(self):
         # Uso para el testeo de camara
@@ -81,11 +97,6 @@ class DetectLinea(Node):
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
-
-
-    def publishcamara(self, img):
-        self.publiscam_.publish(self.br.cv2_to_imgmsg(img))
-        self.get_logger().info('Publishing video frame')
 
     def detectar_puntos_activos(self, cuadricula, hImg, wImg, img, puntos):
         """
@@ -146,6 +157,11 @@ class DetectLinea(Node):
         # Definir la velocidad angular base
         velocidad_angular = 0.1
 
+        aumento_contador = 0.00001
+        aumento_contador_memoria = 0.00002
+        aumento_giro = 0.00001
+        aumento_giro_memoria = 0.0001
+
         # Caso 1: No hay puntos y la velocidad es cero
         if suma_central == vel == 0:
             if self.memoria == 0:
@@ -153,39 +169,46 @@ class DetectLinea(Node):
                 print("Mantener la trayectoria recta")
                 self.publish_velocity((0.1, 0.0))
                 #time.sleep(1)
-            elif self.memoria == 1:
-                # Girar hacia la izquierda (usando la memoria de giro previa)
-                self.publish_velocity((0.0, -self.contador))
-                self.contador -= 0.01
             elif self.memoria == -1:
+                # Girar hacia la izquierda (usando la memoria de giro previa)
+                print("Girar hacia la izquierda (usando la memoria de giro previa)")
+                self.publish_velocity((0.1 - self.giro, self.contador))
+                self.contador -= aumento_contador_memoria
+                self.giro += aumento_giro_memoria * 2
+
+            elif self.memoria == 1:
                 # Girar hacia la derecha (usando la memoria de giro previa)
-                self.publish_velocity((0.0, self.contador))
-                self.contador += 0.01
+                print("Girar hacia la derecha (usando la memoria de giro previa)")
+                self.publish_velocity((0.1 - self.giro, -self.contador))
+                self.contador += aumento_contador_memoria
+                self.giro += aumento_giro_memoria * 2
 
         # Caso 2: La velocidad es negativa (girar hacia la izquierda)
-        elif vel < -13:
+        elif vel < -10:
             if self.contador > 0:
                 # Ajustar la velocidad angular para una rotación más suave
                 print("Girar hacia la izquierda con mayor suavidad")
-                self.publish_velocity((0.0, velocidad_angular - self.contador))
-                self.contador -= 0.01
+                self.publish_velocity((0.1 - self.giro, -velocidad_angular + self.contador))
+                self.contador -= aumento_contador
+                self.giro += aumento_giro
             else:
                 # Giro estándar hacia la izquierda
                 print("Girar hacia la izquierda")
-                self.publish_velocity((0.0, velocidad_angular))
+                self.publish_velocity((0.1, -velocidad_angular))
             self.memoria = -1
 
         # Caso 3: La velocidad es positiva (girar hacia la derecha)
-        elif vel > 18:
+        elif vel > 10:
             if self.contador > 0:
                 # Ajustar la velocidad angular para una rotación más suave
                 print("Girar hacia la derecha con mayor suavidad")
-                self.publish_velocity((0.0, -velocidad_angular + self.contador))
-                self.contador += 0.01
+                self.publish_velocity((0.1 - self.giro, velocidad_angular - self.contador))
+                self.contador += aumento_contador
+                self.giro += aumento_giro
             else:
                 # Giro estándar hacia la derecha
                 print("Girar hacia la derecha")
-                self.publish_velocity((0.0, -velocidad_angular))
+                self.publish_velocity((0.1, velocidad_angular))
             self.memoria = 1
 
         # Caso 4: Velocidad positiva o nula (ir recto)
@@ -194,101 +217,103 @@ class DetectLinea(Node):
             # Publicar velocidad para avanzar recto
             self.publish_velocity((0.18, 0.0))
             # Reiniciar el contador de ajuste de giro
-            self.contador = 0.2
+            self.contador = 0.15
+            self.giro = 0.01
+
+        print(vel)
 
     def detectar(self):
-        # Bucle principal para detectar puntos activos y realizar movimientos
-        while True:
-            # Leer un frame de la cámara
+        # Leer un frame de la cámara
+        if not self.sim or self.priemra_vez:
             success, img = self.cap.read()
-            # Convertir el formato de color de BGR a RGB
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-            # Convertir la imagen al espacio de color HSV
-            hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+            self.priemra_vez = False
+        else:
+            img = self.cap
+        # Convertir el formato de color de BGR a RGB
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        # Convertir la imagen al espacio de color HSV
+        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
-            # Crear una máscara para identificar los píxeles dentro del rango de color azul
-            mask = cv2.inRange(hsv, self.lower_blue, self.upper_blue)
-            # Aplicar la máscara a la imagen original
-            resultado = cv2.bitwise_and(img, img, mask=mask)
+        # Crear una máscara para identificar los píxeles dentro del rango de color azul
+        mask = cv2.inRange(hsv, self.lower_blue, self.upper_blue)
+        # Aplicar la máscara a la imagen original
+        resultado = cv2.bitwise_and(img, img, mask=mask)
 
-            # Obtener las dimensiones de la imagen resultante
-            hImg, wImg, _ = resultado.shape
+        # Obtener las dimensiones de la imagen resultante
+        hImg, wImg, _ = resultado.shape
 
-            # Dividir la imagen en una cuadrícula de divisiones x divisiones
-            cuadricula = [
-                [resultado[i * hImg // self.divisiones:(i + 1) * hImg // self.divisiones,
-                 j * wImg // self.divisiones:(j + 1) * wImg // self.divisiones] for j in range(self.divisiones)]
-                for i in range(self.divisiones)
-            ]
+        # Dividir la imagen en una cuadrícula de divisiones x divisiones
+        cuadricula = [
+            [resultado[i * hImg // self.divisiones:(i + 1) * hImg // self.divisiones,
+             j * wImg // self.divisiones:(j + 1) * wImg // self.divisiones] for j in range(self.divisiones)]
+            for i in range(self.divisiones)
+        ]
 
-            # Crear una matriz para almacenar la posición de los puntos activos
-            puntos = [[0] * self.divisiones for _ in range(self.divisiones)]
-            # Detectar los puntos activos en la cuadrícula
-            self.detectar_puntos_activos(cuadricula, hImg, wImg, img, puntos)
+        # Crear una matriz para almacenar la posición de los puntos activos
+        puntos = [[0] * self.divisiones for _ in range(self.divisiones)]
+        # Detectar los puntos activos en la cuadrícula
+        self.detectar_puntos_activos(cuadricula, hImg, wImg, img, puntos)
 
-            # Calcular la suma de puntos en la columna central y la diferencia de posiciones
-            suma_central, diferencia = self.calcular_diferencia_puntos(puntos)
-            # Imprimir información sobre la suma de puntos y la diferencia de posiciones
-            #print("Suma en columna central:", suma_central)
-            #print("Diferencia de posiciones:", diferencia)
+        # Calcular la suma de puntos en la columna central y la diferencia de posiciones
+        suma_central, diferencia = self.calcular_diferencia_puntos(puntos)
+        # Imprimir información sobre la suma de puntos y la diferencia de posiciones
+        # print("Suma en columna central:", suma_central)
+        # print("Diferencia de posiciones:", diferencia)
 
-            # Realizar el movimiento del robot en base a la suma de puntos y la diferencia de posiciones
-            self.movimiento(suma_central, diferencia)
+        # Realizar el movimiento del robot en base a la suma de puntos y la diferencia de posiciones
+        self.movimiento(suma_central, diferencia)
 
-            # Mostrar las imágenes resultantes
+        # Mostrar las imágenes resultantes
 
-            if self.camara_sub:
-                self.publishcamara(img)
-            else:
-                #cv2.imshow("Result", resultado)
-                #print("Mostrando imagen")
-                cv2.imshow("Video", img)
+        if self.camara_sub:
+            self.publishcamara(img)
+        else:
+            # cv2.imshow("Result", resultado)
+            # print("Mostrando imagen")
+            cv2.imshow("Video", img)
 
-            # Esperar a que se presione la tecla 'q' para salir del bucle
+        # Esperar a que se presione la tecla 'q' para salir del bucle
 
+        if cv2.waitKey(1) & 0xFF == ord('s'):
+            print("\n\n\n\n")
+            self.publish_velocity((0.0, 0.0))
 
-            if cv2.waitKey(1) & 0xFF == ord('s'):
-                print("\n\n\n\n")
-                self.publish_velocity((0.0, 0.0))
-    
-            if cv2.waitKey(1) & 0xFF == ord('w'):
-                print("\n\n\n\n")
-                self.memoria = 0
-                self.publish_velocity((0.1, 0.0))
-    
-            if cv2.waitKey(1) & 0xFF == ord('a'):
-                self.memoria = -1
-                print("\n\n\n\n")
-                self.publish_velocity((0.0, -0.5))
-    
-            if cv2.waitKey(1) & 0xFF == ord('d'):
-                self.memoria = 1
-                print("\n\n\n\n")
-                self.publish_velocity((0.0, 0.5))
+        if cv2.waitKey(1) & 0xFF == ord('w'):
+            print("\n\n\n\n")
+            self.memoria = 0
+            self.publish_velocity((0.1, 0.0))
 
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                print("Saliendo del bucle principal")
-                break
-    
-            """
+        if cv2.waitKey(1) & 0xFF == ord('a'):
+            self.memoria = -1
+            print("\n\n\n\n")
+            self.publish_velocity((0.0, -0.5))
 
-            if keyboard.is_pressed('s'):
-                self.memoria = 0
-            if keyboard.is_pressed('a'):
-                self.memoria = -1
-            if keyboard.is_pressed('d'):
-                self.memoria = 1
-            if keyboard.is_pressed('w'):
-                self.memoria = 0
-            if keyboard.is_pressed('q'):
-                print("Saliendo del bucle principal")
-                break
-            """
+        if cv2.waitKey(1) & 0xFF == ord('d'):
+            self.memoria = 1
+            print("\n\n\n\n")
+            self.publish_velocity((0.0, 0.5))
 
-        self.cap.release()
-        cv2.destroyAllWindows()
-        super().destroy_node()
-        rclpy.shutdown()
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            print("Saliendo del bucle principal")
+            self.cap.release()
+            cv2.destroyAllWindows()
+            super().destroy_node()
+            rclpy.shutdown()
+
+        """
+
+        if keyboard.is_pressed('s'):
+            self.memoria = 0
+        if keyboard.is_pressed('a'):
+            self.memoria = -1
+        if keyboard.is_pressed('d'):
+            self.memoria = 1
+        if keyboard.is_pressed('w'):
+            self.memoria = 0
+        if keyboard.is_pressed('q'):
+            print("Saliendo del bucle principal")
+            break
+        """
 
 
 def menu():
@@ -306,12 +331,15 @@ def menu():
 
 
 def main(args=None):
-
+    camara_sub = False
+    sim = False
     rclpy.init(args=args)
     if input("esta en raspberry y/n ") == "y":
-        robot = DetectLinea(camara_sub=True)
-    else:
-        robot = DetectLinea()
+        camara_sub = True
+    if input("esta en simulador y/n ") == "y":
+        sim = True
+
+    robot = DetectLinea(camara_sub=camara_sub, sim=sim)
 
     opcion = menu()
 
@@ -319,22 +347,22 @@ def main(args=None):
         if opcion == 1:
             rclpy.spin(robot)
         elif opcion == 2:
-            vel = int(input(
+            vel = input(
                 "Elija la direccion que tomara: \n"
                 "Valor < -13 girar a la izquierda \n"
                 "Valor > 18 girar a la derecha \n"
                 "Valor intermedio ir recto \n"
                 "No poner nada acaba el programa \n"
-            ))
+            )
             while vel != "":
-                robot.movimiento(0, vel)
-                vel = int(input(
+                robot.movimiento(0, int(vel))
+                vel = input(
                     "Elija la direccion que tomara: \n"
                     "Valor < -13 girar a la izquierda \n"
                     "Valor > 18 girar a la derecha \n"
                     "Valor intermedio ir recto \n"
                     "No poner nada acaba el programa \n"
-                ))
+                )
             robot.publish_velocity((0.0, 0.0))
 
         elif opcion == 3:
