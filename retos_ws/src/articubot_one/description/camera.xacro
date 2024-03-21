@@ -1,22 +1,36 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" >
-
-    <joint name="camera_joint" type="fixed">
-        <parent link="chassis"/>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" >    
+    
+    <xacro:include filename="inertial_macros.xacro"/>
+    <joint name="camera_joint" type="revolute">
+        <parent link="base_link"/>
         <child link="camera_link"/>
-        <origin xyz="0.257 0 0.070" rpy="0 1.57 0"/>
+        <origin xyz="0.205 0 0.08" rpy="0 0 0"/>
+        <axis xyz="0 1 0"/>
+        <limit lower="0" upper="${pi/2}" velocity="100" effort="0.5"/> 
     </joint>
 
     <link name="camera_link">
         <visual>
             <geometry>
-                <box size="0.001 0.03 0.03"/>
+                <box size="0.010 0.03 0.03"/>
             </geometry>
-            <material name="black"/>
+            <material name="red"/>
         </visual>
+        <collision>
+            <geometry>
+                <sphere radius="0.01"/>
+            </geometry>
+        </collision>
+        <xacro:inertial_box mass="0.001" x="0.0001" y="0.0001" z="0.0001">
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+        </xacro:inertial_box>
     </link>
 
-
+    <gazebo reference="camera_link">
+        <material>Gazebo/Red</material>
+    </gazebo>
+    
     <joint name="camera_optical_joint" type="fixed">
         <parent link="camera_link"/>
         <child link="camera_link_optical"/>
@@ -24,11 +38,24 @@
     </joint>
 
     <link name="camera_link_optical"></link>
-
-
+    
+    <gazebo>
+        <plugin name="gazebo_ros_joint_state_publisher"
+            filename="libgazebo_ros_joint_state_publisher.so">
+            <update_rate>20</update_rate>
+            <joint_name>camera_joint</joint_name>
+        </plugin>
+    </gazebo>
+    
+    <gazebo>
+        <plugin name="gazebo_ros_joint_pose_trajectory"
+            filename="libgazebo_ros_joint_pose_trajectory.so">
+            <update_rate>2</update_rate>
+        </plugin>
+    </gazebo>
 
     <gazebo reference="camera_link">
-        <material>Gazebo/Black</material>
+        <material>Gazebo/Red</material>
 
         <sensor name="camera" type="camera">
             <pose> 0 0 0 0 0 0 </pose>
@@ -49,6 +76,14 @@
             <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
                 <frame_name>camera_link_optical</frame_name>
             </plugin>
+            <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+                <robotNamespace>/</robotNamespace>
+            </plugin>
+            <plugin name="camera_control_plugin" filename="libcamera_control_plugin.so">
+                <command_topic>/camera_control</command_topic>
+                <robot_namespace>/</robot_namespace>
+            </plugin>
+            
         </sensor>
     </gazebo>
 

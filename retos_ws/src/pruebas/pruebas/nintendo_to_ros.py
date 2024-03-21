@@ -1,3 +1,4 @@
+from time import sleep
 import subprocess
 import rclpy
 from rclpy.node import Node
@@ -9,16 +10,21 @@ import cv2
 import sys
 import os
 import signal
+from trajectory_msgs.msg import JointTrajectory
+from trajectory_msgs.msg import JointTrajectoryPoint
+from std_msgs.msg import Header
+from geometry_msgs.msg import TransformStamped
 
 class Button_publisher(Node):
 
     def __init__(self):
         super().__init__('button_publisher')
         self.publisher_ = self.create_publisher(Twist, 'cmd_vel', 10)
+        self.publisher_camera_ = self.create_publisher(JointTrajectory, '/set_joint_trajectory', 10)
+        self.publisher_camera_
         self.publisher_
         timer_period = 0.001  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
-        self.camera_tilt_publisher = self.create_publisher(Float64, 'camera_tilt_angle', 10)
 
         
         self.tupla = (0.0, 0.0)
@@ -26,6 +32,7 @@ class Button_publisher(Node):
         self.y = 0.0
         self.camera_tilt_angle = 0.0
         self.max_camera_tilt = 4.0
+        self.min_camera_tilt = -4.0
         self.counter = 0
         
         self.side_counter = False
@@ -34,6 +41,32 @@ class Button_publisher(Node):
         
     def timer_callback(self):
         self.run()
+    
+    def publish_camera_tilt_angle(self, angle):
+        print('SEXO')
+        
+        msg = JointTrajectory()
+        msg.header = Header()
+        msg.header.frame_id = 'world'
+        msg.joint_names = ['camera_joint']
+        point = JointTrajectoryPoint()
+        point.positions = [0.0]
+        msg.points = [point]
+        self.publisher_camera_.publish(msg)
+        self.get_logger().info('Published message')
+        
+    def publish_camera_tilt_angle2(self, angle):
+        print('SEXO2')
+        
+        msg = JointTrajectory()
+        msg.header = Header()
+        msg.header.frame_id = 'world'
+        msg.joint_names = ['camera_joint']
+        point = JointTrajectoryPoint()
+        point.positions = [4.0]
+        msg.points = [point]
+        self.publisher_camera_.publish(msg)
+        self.get_logger().info('Published message')
 		
     def run(self):
         # Ejecutar el comando tcpdump en la terminal
@@ -75,8 +108,10 @@ class Button_publisher(Node):
                     print('# START! #')
                     print('##########\n')
                     self.counter += 1
-                elif columna == '0000':
+                elif columna == '0000' and self.counter >= 1:
+                    
                     self.side_counter = False
+                    
                 elif columna == '0100': # A
                     self.tupla = (0.2, 0.0)
                     self.x = 0.2
@@ -100,8 +135,14 @@ class Button_publisher(Node):
                     msg = Twist()
                     msg.linear.x = self.tupla[0]
                     msg.angular.z = self.tupla[1]
+                    
+                    msg.linear.y = 0.0
+                    msg.linear.z = 0.0
+                    msg.angular.x = 0.0
+                    msg.angular.y = 0.0
+                    
                     self.publisher_.publish(msg)
-                    self.get_logger().info(f"({msg.linear.x}, {msg.angular.z})")
+                    self.get_logger().info(f"({msg.linear.x}, {msg.linear.y}, {msg.linear.z},{msg.angular.x}, {msg.angular.z},{msg.angular.z})")
                 elif columna == '0008': # Y
                     pass
                 elif columna == '4000' and self.x <= 2.0 and self.side_counter == False: # UP
@@ -149,23 +190,21 @@ class Button_publisher(Node):
                     self.get_logger().info(f"({msg.linear.x}, {msg.angular.z})")
                     
                 elif columna == '0001': # R
-                    if self.camera_tilt_angle < self.max_camera_tilt:
-                        self.camera_tilt_angle += 0.1 
-                        camera_msg = Float64()
-                        camera_msg.data = self.camera_tilt_angle
-                        self.camera_tilt_publisher.publish(camera_msg)
-                        self.get_logger().info(f"{camera_msg.data}")
+                    
+                    self.camera_tilt_angle += 0.1
+                    self.publish_camera_tilt_angle(self.camera_tilt_angle)
+                        
                 elif columna == '0002': # L
-                    pass  
+                    self.camera_tilt_angle -= 0.1
+                    self.publish_camera_tilt_angle2(self.camera_tilt_angle)
+
                 elif columna == '0800': # START
                     print('Shutting down...')
                     os.killpg(os.getpgid(proceso0.pid), signal.SIGTERM)
-                    
                     exit()
             
                 
         except KeyboardInterrupt:
-            # Manejar la interrupción de teclado para terminar el proceso
             proceso.terminate()
 
 def main(args=None):
