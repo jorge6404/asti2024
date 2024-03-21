@@ -25,6 +25,7 @@
         <xacro:inertial_box mass="0.001" x="0.0001" y="0.0001" z="0.0001">
             <origin xyz="0 0 0" rpy="0 0 0"/>
         </xacro:inertial_box>
+        <gravity>false</gravity>
     </link>
 
     <gazebo reference="camera_link">
@@ -85,6 +86,32 @@
             </plugin>
             
         </sensor>
+    </gazebo>
+    
+    <gazebo>
+        <plugin name="diff_drive" filename="libgazebo_ros_diff_drive.so">
+
+            <!-- Wheel Information -->
+            <left_joint>camera_joint</left_joint>
+
+            <!-- Limits -->
+            <max_wheel_torque>200</max_wheel_torque>
+            <max_wheel_acceleration>10.0</max_wheel_acceleration>
+
+            
+            <!-- Output -->
+            <odometry_frame>odom</odometry_frame>
+            <robot_base_frame>base_link</robot_base_frame>
+
+            <publish_odom>true</publish_odom>
+            <publish_odom_tf>true</publish_odom_tf>
+            <publish_wheel_tf>true</publish_wheel_tf>
+
+        </plugin>
+        
+        
+
+
     </gazebo>
 
 </robot>
