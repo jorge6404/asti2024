@@ -13,6 +13,7 @@ import signal
 from trajectory_msgs.msg import JointTrajectory
 from trajectory_msgs.msg import JointTrajectoryPoint
 from std_msgs.msg import Header
+
 from geometry_msgs.msg import TransformStamped
 
 class Button_publisher(Node):
@@ -43,8 +44,6 @@ class Button_publisher(Node):
         self.run()
     
     def publish_camera_tilt_angle(self, angle):
-        print('SEXO')
-        
         msg = JointTrajectory()
         msg.header = Header()
         msg.header.frame_id = 'world'
@@ -55,9 +54,7 @@ class Button_publisher(Node):
         self.publisher_camera_.publish(msg)
         self.get_logger().info('Published message')
         
-    def publish_camera_tilt_angle2(self, angle):
-        print('SEXO2')
-        
+    def publish_camera_tilt_angle2(self, angle):        
         msg = JointTrajectory()
         msg.header = Header()
         msg.header.frame_id = 'world'
@@ -144,7 +141,10 @@ class Button_publisher(Node):
                     self.publisher_.publish(msg)
                     self.get_logger().info(f"({msg.linear.x}, {msg.linear.y}, {msg.linear.z},{msg.angular.x}, {msg.angular.z},{msg.angular.z})")
                 elif columna == '0008': # Y
-                    pass
+                    msg = Twist()
+                    msg.linear.x = 2.0
+                    self.publisher_.publish(msg)
+                    self.get_logger().info(f"{msg.linear.x}")
                 elif columna == '4000' and self.x <= 2.0 and self.side_counter == False: # UP
                     self.side_counter = True
                     self.y = 0.0

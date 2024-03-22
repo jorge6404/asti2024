@@ -2,10 +2,11 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" >    
     
     <xacro:include filename="inertial_macros.xacro"/>
+       
     <joint name="camera_joint" type="revolute">
         <parent link="base_link"/>
         <child link="camera_link"/>
-        <origin xyz="0.205 0 0.08" rpy="0 0 0"/>
+        <origin xyz="0.205 0 0.08" rpy="0 0 0"/>   <!-- Para cambiar la altura de la cámara, modifica el valor z. Ideal para altura de robot: 0.08. Más altura depende del campo de visión que se necesite -->
         <axis xyz="0 1 0"/>
         <limit lower="0" upper="${pi/2}" velocity="100" effort="0.5"/> 
     </joint>
@@ -93,6 +94,7 @@
 
             <!-- Wheel Information -->
             <left_joint>camera_joint</left_joint>
+            <right_joint>new_joint</right_joint>
 
             <!-- Limits -->
             <max_wheel_torque>200</max_wheel_torque>
