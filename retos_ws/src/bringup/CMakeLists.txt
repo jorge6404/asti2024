@@ -21,6 +21,7 @@ find_package(rclcpp REQUIRED)
 find_package(dynamixel_sdk REQUIRED)
 find_package(custom_interfaces REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
 
 include_directories(include)
 
@@ -37,6 +38,7 @@ ament_target_dependencies(motor_vel_controller
   dynamixel_sdk
   custom_interfaces
   geometry_msgs
+  std_msgs
 )
 
 add_executable(keyboard_teleop src/keyboard_teleop.cpp)
