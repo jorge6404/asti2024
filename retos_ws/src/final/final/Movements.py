@@ -6,42 +6,37 @@ from geometry_msgs.msg import Twist
 from std_msgs.msg import Float32
 from custom_interfaces.msg import SetPosition
 
-'''
-from .Movements import Movements
-mov = Movements()
-
-# Queremos probar si el robot hace todos los movimientos correctamente?:
-mov.prueba_movimientos()
-
-#Queremos ejecutar movimientos básicos?:
-mov.avanzar()
-mov.retroceder()
-mov.detener()
-mov.girar_izquierda()
-mov.girar_derecha()
-
-# Queremos ejecutar más movimientos avanzados, en base a distancias, radios, etc?:
-mov.avanzar_distancia(distancia_total=1)
-girar_grados(self, degrees=90, direccion=izq, radio=1)
-
-# Va muy rápido el robot para la prueba concreta, y queremos una aceleración más progresiva para cualquier movimiento?
-mov.actualizar_velocidades(self, max_linear_vel=0.1, max_angular_vel=1, linear_acc=0.01, angular_acc=0.1):
-
-POR QUÉ ES ÚTIL?
-Lo interesante de esto, es el hecho de poder simplificar mucho más el código, y no tener que estar preocupándonos por las velocidades, aceleraciones...  
-Esto ya estaba más o menos implementado antes, pero ahora está mejor organizado y más fácil de usar.
-
-Ejemplo:
-'''
-
 class Movements(Node):
     def __init__(self):
         """
-        Clase Personalizada para el manejo de movimientos del robot
+        Clase Personalizada para el manejo de movimientos del robot.
         
-        EJEMPLO TOOLS:
+        SETUP INICIAL:
         from .Movements import Movements      (Falta ver si este tipo de importación en la raspberry funciona bien)
         mov = Movements()
+        
+        EJEMPLO RUEDAS BÁSICOS:
+        mov.avanzar()
+        mov.retroceder()
+        mov.girar_izquierda()
+        mov.girar_derecha()
+        mov.detener()
+        mov.prueba_movimientos()      (Avanzar, retroceder, girar izquierda, girar derecha, detenerse -> Para probar que todo funciona bien)
+        
+        EJEMPLO RUEDAS POR DISTANCIAS, RADIOS, GRADOS:
+        mov.avanzar_distancia(1)        (Avanzar 1 metro)
+        mov.retroceder_distancia(1)
+        mov.girar_grados_izq(90)        (Radio 0.0 por defecto)
+        mov.girar_grados_der(75)
+        mov.girar_grados_izq(90, radio=1.5)
+        
+        EJEMPLO MODIFICAR VELOCIDADES:
+        mov.actualizar_vel_lineal(0.1)
+        mov.actualizar_vel_angular(1)
+        mov.actualizar_acc_lineal(0.01)
+        mov.actualizar_acc_angular(0.1)
+        
+        EJEMPLO TOOLS:
         mov.herramienta_girar(90)
         mov.boli_subir()
         mov.boli_bajar()
@@ -64,7 +59,7 @@ class Movements(Node):
         
         # TOOL
         self.tool_pos = 0.0
-        self.tool_id = 3
+        self.tool_id = 3    # id 1,2 ruedas, id 3 herramienta
         self.grados_boli_alto = 0.0     # TODO: Cambiar a valor correcto para cada prueba
         self.grados_boli_bajo = 0.0     
         self.grados_bolos_soltar = 0.0  
@@ -87,12 +82,18 @@ class Movements(Node):
     def show_current_vel(self):
         self.get_logger().info(f'Current velocity: {self.last_vel}')
         
-    def actualizar_velocidades(self, max_linear_vel, max_angular_vel, linear_acc, angular_acc):
+    def actualizar_vel_lineal(self, max_linear_vel):
         self.max_linear_vel = max_linear_vel
+    
+    def actualizar_vel_angular(self, max_angular_vel):
         self.max_angular_vel = max_angular_vel
+    
+    def actualizar_acc_lineal(self, linear_acc):
         self.linear_acc = linear_acc
+    
+    def actualizar_acc_angular(self, angular_acc):
         self.angular_acc = angular_acc
-        
+    
     # ╔═════════════════════════════╗
     # ║       TOOL FUNCTIONS        ║
     # ╚═════════════════════════════╝
@@ -178,28 +179,28 @@ class Movements(Node):
     # ║ FUNCIONES POR DISTANCIAS, RADIOS O GRADOS ║
     # ╚═══════════════════════════════════════════╝
     
-    def avanzar_distancia(self, distancia_total):
+    def avanzar_distancia(self, distancia):
         # Con aceleración
         vel_linear = 0.0
-        while(distancia_total >= 0):
+        while(distancia >= 0):
             if (vel_linear < self.max_linear_vel):
                 vel_linear += self.linear_acc
             self.publish_wheel_velocity(vel_linear, 0.0)
             time.sleep(0.1)
             distancia_recorrida = vel_linear*0.1
-            distancia_total -= distancia_recorrida
+            distancia -= distancia_recorrida
         self.detener()
 
-    def retroceder_distancia(self, distancia_total):
+    def retroceder_distancia(self, distancia):
         # Con aceleración
         vel_linear = 0.0
-        while(distancia_total >= 0):
+        while(distancia >= 0):
             if (vel_linear < self.max_linear_vel):
                 vel_linear += self.linear_acc
             self.publish_wheel_velocity(-vel_linear, 0.0)
             time.sleep(0.1)
             distancia_recorrida = vel_linear*0.1
-            distancia_total -= distancia_recorrida
+            distancia -= distancia_recorrida
         self.detener()
 
     def girar_grados(self, degrees, direccion, radio=0.0):
