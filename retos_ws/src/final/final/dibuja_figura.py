@@ -1,67 +1,22 @@
 #!/usr/bin/env python3
-# TODO: Implementar giros con "Movements.py" en lugar de hacerlo manualmente?
-
-CON_GPIO=False   # Cambiar a True si se está ejecutando en la Raspberry Pi con el motor de la herramienta
 
 # Import the necessary ROS2 libraries
 import rclpy
-from rclpy.node import Node
-from geometry_msgs.msg import Twist
-if CON_GPIO:
-  import RPi.GPIO as GPIO
 import time
 from math import pi
 from .Movements import Movements
 
-SERVO_PIN = 12 
-FRECUENCIA = 50
 SLEEP_TIME_BOLI = 0.5
 SLEEP_TIME_MOVIMIENTO = 0.1
 
 VELOCIDAD_LINEAL = 0.1
 VELOCIDAD_ANGULAR = 0.5
 
+def subir_boli():
+  print("Subiendo boli")
 
-
-# Servo y GPIO
-def init_servo():
-  if CON_GPIO:
-    print("Inicializando servo")
-    GPIO.setmode(GPIO.BOARD)
-    GPIO.setup(SERVO_PIN, GPIO.OUT)
-    servo = GPIO.PWM(SERVO_PIN, FRECUENCIA)
-    servo.start(0)
-    time.sleep(1)   # Esperar a que el servo se inicialice
-    print("Servo inicializado correctamente")
-    return servo
-  else:
-    print("Servo no detectado para inicializarlo.")
-    return None
-
-def parar_servo(servo):
-  if CON_GPIO:
-    print("Parando servo")
-    servo.ChangeDutyCycle(2+(120/18))
-    servo.stop()
-    GPIO.cleanup()
-  else:
-    print("Servo no detectado para pararlo.")
-  
-def subir_boli(servo):
-  if CON_GPIO:
-    print("Subiendo boli")
-    servo.ChangeDutyCycle(2+(110/18))       # TODO: Revisar valores y cambiar posiciones servos
-  else:
-    print("Boli no detectado para subrirlo.")
-  time.sleep(SLEEP_TIME_BOLI)
-
-def bajar_boli(servo):
-  if CON_GPIO:
-    print("Bajando boli")
-    servo.ChangeDutyCycle(2+(130/18))
-  else:
-    print("Boli no detectado para bajarlo.")
-  time.sleep(SLEEP_TIME_BOLI)
+def bajar_boli():
+  print("Bajando boli")
 
 
 def get_figure_params(opcion_menu):
@@ -95,15 +50,14 @@ def pedir_opcion_menu():
   print(" a. Prueba de movimiento")
   print(" s. Subir boli")
   print(" d. Bajar boli")
-  print(" f. Reiniciar servo")
   print(" q. Salir")
   
   return input("Seleccione una opcion: ")
 
-def dibujar_figura(servo, mov: Movements, opcion_menu):
+def dibujar_figura(mov: Movements, opcion_menu):
   angulo, largo, ancho, lados = get_figure_params(opcion_menu)
   
-  bajar_boli(servo)
+  bajar_boli()
   
   for i in range(lados):
     if i % 2:
@@ -113,16 +67,16 @@ def dibujar_figura(servo, mov: Movements, opcion_menu):
     
     # Move forward
     print("Moviendo hacia adelante")
-    for linear_iterations in range(int(distancia / (abs(VELOCIDAD_LINEAL) * 0.1))):
+    for linear_iterations in range(int(distancia / (abs(VELOCIDAD_LINEAL) * SLEEP_TIME_MOVIMIENTO))):
         mov.avanzar()
         time.sleep(SLEEP_TIME_MOVIMIENTO)
 
     mov.detener()
-    subir_boli(servo)
+    subir_boli()
 
     # Move forward 16cm
     print("Moviendo hacia adelante")
-    for linear_iterations in range(int(0.2 / (abs(VELOCIDAD_LINEAL) * 0.1))):
+    for linear_iterations in range(int(0.2 / (abs(VELOCIDAD_LINEAL) * SLEEP_TIME_MOVIMIENTO))):
         mov.avanzar()
         time.sleep(SLEEP_TIME_MOVIMIENTO)
 
@@ -130,7 +84,7 @@ def dibujar_figura(servo, mov: Movements, opcion_menu):
 
     # Turn
     print("Girando")
-    for angular_iterations in range(int(angulo / (abs(VELOCIDAD_ANGULAR) * 0.1))):
+    for angular_iterations in range(int(angulo / (abs(VELOCIDAD_ANGULAR) * SLEEP_TIME_MOVIMIENTO))):
         mov.girar_izquierda()
         time.sleep(SLEEP_TIME_MOVIMIENTO)
 
@@ -138,18 +92,16 @@ def dibujar_figura(servo, mov: Movements, opcion_menu):
 
     # Move backward 16cm
     print("Moviendo hacia atras")
-    for linear_iterations in range(int(0.15 / (abs(VELOCIDAD_LINEAL) * 0.1))):
+    for linear_iterations in range(int(0.15 / (abs(VELOCIDAD_LINEAL) * SLEEP_TIME_MOVIMIENTO))):
         mov.retroceder()
         time.sleep(SLEEP_TIME_MOVIMIENTO)
 
     mov.detener()
-    bajar_boli(servo)
+    bajar_boli()
 
 
 
 def main():
-  servo = init_servo()
-  
   rclpy.init(args=None)
   node = rclpy.create_node('figuras')
   mov = Movements()
@@ -162,21 +114,17 @@ def main():
     if opcion_menu == 'a':
       mov.prueba_movimientos()
     elif opcion_menu == 's':
-      subir_boli(servo)
+      subir_boli()
     elif opcion_menu == 'd':
-      bajar_boli(servo)
-    elif opcion_menu == 'f':
-      parar_servo(servo)
-      servo = init_servo()
+      bajar_boli()
     elif opcion_menu == 'q':
       break
     # Dibujar figura
     elif opcion_menu in ['1', '2', '3']:  # Triangulo, cuadrado, rectangulo
-      dibujar_figura(servo, mov, opcion_menu)
+      dibujar_figura(mov, opcion_menu)
     else:
       print("Opcion no valida, 'q' para salir")
 
   mov.detener()
-  parar_servo(servo)
   rclpy.shutdown()
 

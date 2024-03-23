@@ -18,3 +18,13 @@ retos_ws/src/semifinal/semifinal/__pycache__/
 retos_ws/src/semifinal/semifinal/__pycache__/misfunciones.cpython-38.pyc
 retos_ws/src/semifinal/semifinal/__pycache__/laberinto.cpython-38.pyc
 retos_ws/src/articubot_one/config/config.yaml
+retos_ws/src/articubot_one/turtlebot/
+retos_ws/src/articubot_one/Tutorials-2020-main/CMakeLists.txt
+retos_ws/src/articubot_one/Tutorials-2020-main/config/joints.yaml
+retos_ws/src/articubot_one/Tutorials-2020-main/launch/gazebo.launch
+retos_ws/src/articubot_one/Tutorials-2020-main/package.xml
+retos_ws/src/articubot_one/Tutorials-2020-main/README.md
+retos_ws/src/articubot_one/Tutorials-2020-main/urdf/arm.xacro
+retos_ws/src/articubot_one/Tutorials-2020-main/urdf/main.xacro
+retos_ws/src/articubot_one/Tutorials-2020-main/urdf/head.xacro
+retos_ws/src/articubot_one/Tutorials-2020-main/urdf/shrek.stl

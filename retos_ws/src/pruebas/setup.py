@@ -25,6 +25,7 @@ setup(
             'detect_text_sub = pruebas.detect_text_sub:main',
             'distance_sensor = pruebas.distance_sensor:main',
             'nintendo_to_ros = pruebas.nintendo_to_ros:main',
+            'prueba_tcpdump = pruebas.prueba_tcpdump:main'
         ],
     },
 )
