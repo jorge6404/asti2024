@@ -18,7 +18,16 @@ def generate_launch_description():
 
     # Process the URDF file
     pkg_path = os.path.join(get_package_share_directory('simulador_gazebo'))
-    xacro_file = os.path.join(pkg_path,'description','robot.urdf.xacro')
+    modelo = input("Ingrese el modelo del robot: \n"
+                   "1. Cybercrex \n"
+                   "2. Cybercrex_frontal \n"
+                   "3. Cybercrex_camara_movil (aun no hay modelo)\n"
+                   "4. Cybercrex_industrial (aun no hay modelo) \n"
+                   "5. Cybercrex_bolos (aun no hay modelo) \n"
+                   "6. Cybercrex_dibujos (aun no hay modelo) \n"
+                   "7. Cybercrex_sumo (aun no hay modelo) \n"
+                   )
+    xacro_file = os.path.join(pkg_path,'models/' + modelo,'robot.urdf.xacro')
     # robot_description_config = xacro.process_file(xacro_file).toxml()
     robot_description_config = Command(['xacro ', xacro_file, ' use_ros2_control:=', use_ros2_control, ' sim_mode:=', use_sim_time])
     
