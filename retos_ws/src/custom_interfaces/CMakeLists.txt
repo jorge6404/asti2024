@@ -22,10 +22,12 @@ find_package(builtin_interfaces REQUIRED)
 
 set (msg_files
   "msg/SetVelocity.msg"
+  "msg/SetPosition.msg"
 )
 
 set (srv_files
   "srv/GetVelocity.srv"
+  "srv/GetPosition.srv"
 )
 
 rosidl_generate_interfaces(${PROJECT_NAME}

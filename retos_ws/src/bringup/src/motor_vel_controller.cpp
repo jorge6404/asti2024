@@ -1,7 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //                     *** DYNAMIXEL MOTOR ROS2 NODE ***
 //
-//
 //                         * Enable USB port access *
 // >> sudo usermod -aG dialout <linux_account>
 //                           (Restart your computer)
@@ -58,16 +57,21 @@
 dynamixel::PortHandler *portHandler;
 dynamixel::PacketHandler *packetHandler;
 
+// Constants
+constexpr double pi = 3.141592653589793;
+
+// Variables for motor control
 uint8_t id_herramienta = 3;
-uint8_t dxl_error = 0;
 uint32_t goal_position = 0;
 uint32_t right_wheel_velocity = 0;
 uint32_t left_wheel_velocity = 0;
-int dxl_comm_result = COMM_TX_FAIL;
-constexpr double pi = 3.141592653589793;
 
 // Unit that allows the program to convert desired robot velocity to motor velocity units
 const double distance_unit = 1 / (pi * VELOCITY_UNIT * WHEEL_DIAMETER / 60);
+
+// Error handling
+int dxl_comm_result = COMM_TX_FAIL;
+uint8_t dxl_error = 0;
 
 
 MotorController::MotorController()
@@ -82,7 +86,10 @@ MotorController::MotorController()
    const auto QOS_RKL10V = // Defines QoS
    rclcpp::QoS(rclcpp::KeepLast(qos_depth)).reliable().durability_volatile();
 
-   // Subscribes to cmd_vel topic and defines its callback
+   // ╔═════════════════════════════╗
+   // ║  CMD_VEL TO MOTOR_MOVEMENT  ║
+   // ╚═════════════════════════════╝
+    
    cmd_vel_subscriber_ =
       this->create_subscription<Twist>(
       "cmd_vel",
@@ -145,6 +152,10 @@ MotorController::MotorController()
       }
    );
 
+   // ╔═════════════════════════════╗
+   // ║  TOOL_POS TO MOTOR_MOVEMENT ║
+   // ╚═════════════════════════════╝
+
    tool_pos_subscriber_ =
       this->create_subscription<SetPosition>(
       "tool_pos",
@@ -152,18 +163,16 @@ MotorController::MotorController()
       [this](const SetPosition::SharedPtr msg) -> void {
          uint8_t dxl_error = 0;
 
-         // Read linear velocity
-         uint32_t goal_position = (unsigned int) msg->position;   // Convert int32 -> uint32
-         
-         uint32_t calculo = goal_position * 11.375;
+         uint32_t goal_degrees = (unsigned int) msg->position;   // Convert int32 -> uint32
+         uint32_t goal_units = goal_degrees * 11.375;    // Convert normal degrees provided by the user to Dynamixel units
 
-         // Write goal position (4 bytes) to the DYNAMIXEL
+         // Write goal_units (4 bytes) to the DYNAMIXEL
          dxl_comm_result =
          packetHandler->write4ByteTxRx(
             portHandler, 
-            id_herramienta, // Tool ID        // (uint8_t) msg->id,
+            id_herramienta, // Tool ID set at the beginning of the program
             ADDR_GOAL_POSITION,
-            calculo,
+            goal_units,     // Goal position
             &dxl_error
          );
 
@@ -172,10 +181,14 @@ MotorController::MotorController()
          } else if (dxl_error != 0) {
             RCLCPP_ERROR(this->get_logger(), "%s", packetHandler->getRxPacketError(dxl_error));
          } else {
-            RCLCPP_INFO(this->get_logger(), "Set [ID: %d] [Goal Position: %d]", 3, calculo);
+            RCLCPP_INFO(this->get_logger(), "Set [ID: %d] [Goal Position: %d]", id_herramienta, goal_units);
          }
       }
    );
+
+   // ╔═════════════════════════════╗
+   // ║  GET CURRENT VELOCITY       ║
+   // ╚═════════════════════════════╝
 
    // Defines a service to get the motor's current velocity
    auto get_current_velocity =
@@ -203,7 +216,10 @@ MotorController::MotorController()
       };
    get_velocity_server_ = create_service<GetVelocity>("get_velocity", get_current_velocity);
 
-   // Defines a service to get the motor's current position
+   // ╔═════════════════════════════╗
+   // ║  GET CURRENT POSITION       ║
+   // ╚═════════════════════════════╝
+
    auto get_present_position =
     [this](
     const std::shared_ptr<GetPosition::Request> request,
@@ -236,7 +252,7 @@ MotorController::~MotorController() { RCLCPP_INFO(this->get_logger(), "Motor Con
 
 void setupDynamixel(uint8_t dxl_id) {
 
-   // Use Velocity Control mode
+   // ----- SET VELOCITY MODE TO ALL MOTORS
    dxl_comm_result = packetHandler->write1ByteTxRx(
       portHandler, 
       dxl_id, 
@@ -251,6 +267,7 @@ void setupDynamixel(uint8_t dxl_id) {
       RCLCPP_INFO(rclcpp::get_logger("motor_controller"), "Succeeded to set Velocity Control mode.");
    }
 
+   // ------ THEN ONLY SET POSITION MODE TO THE TOOL MOTOR
    dxl_comm_result = packetHandler->write1ByteTxRx(
       portHandler, 
       id_herramienta,
@@ -259,7 +276,8 @@ void setupDynamixel(uint8_t dxl_id) {
       &dxl_error
    );
 
-   // Enable Torque so the motor can move (EEPROM will be locked)
+   // -------- Enable Torque so the motor can move (EEPROM will be locked)
+   // IMPORTANT: Torque must be disabled to change the operating mode
    dxl_comm_result = packetHandler->write1ByteTxRx(
       portHandler, 
       dxl_id, 
@@ -276,15 +294,13 @@ void setupDynamixel(uint8_t dxl_id) {
 }
 
 int main(int argc, char * argv[]) {
+   
+   // Get custom device name
    const char* deviceName = DEFAULT_DEVICE_NAME;
-
    if (argc > 1) {
-      deviceName = argv[1];
+      deviceName = argv[1]; 
    }
-
    std::cout << "Using device: " << deviceName << std::endl;
-
-    // Rest of your code...
 
    portHandler = dynamixel::PortHandler::getPortHandler(deviceName);
    packetHandler = dynamixel::PacketHandler::getPacketHandler(PROTOCOL_VERSION);
@@ -307,15 +323,17 @@ int main(int argc, char * argv[]) {
       RCLCPP_INFO(rclcpp::get_logger("motor_controller"), "Succeeded to set the baudrate.");
    }
    
+   // Initialize Motors with the correct operating mode for each one,
+   // and enable Torque for all of them
    setupDynamixel(BROADCAST_ID);
    
+   // Keep the node running until closed
    rclcpp::init(argc, argv);
-   
    auto motorcontroller = std::make_shared<MotorController>();
    rclcpp::spin(motorcontroller);
-   rclcpp::shutdown();
    
-   // Disable Torque of DYNAMIXEL
+   // On shutdown, disable Torque of DYNAMIXEL
+   rclcpp::shutdown();
    packetHandler->write1ByteTxRx(
       portHandler,
       BROADCAST_ID,
