@@ -1,7 +1,6 @@
 import rclpy  # Python library for ROS 2
 from rclpy.node import Node  # Handles the creation of nodes
 from sensor_msgs.msg import Image  # Image is the message type
-from std_msgs.msg import Int32MultiArray, MultiArrayDimension
 from cv_bridge import CvBridge  # Package to convert between ROS and OpenCV Images
 import cv2  # OpenCV library
 import pytesseract
@@ -64,7 +63,7 @@ class ImageSubscriber(Node):
             # print(b)
             b = b.split(' ')
 
-            # print(b)
+            print(b)
             x, y, w, h = int(b[1]), int(b[2]), int(b[3]), int(b[4])
             # if b[0] in caracteres:
             pintar(x, y, w, h, img, b, hImg, wImg)
