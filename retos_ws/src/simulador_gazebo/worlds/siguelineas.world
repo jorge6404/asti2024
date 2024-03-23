@@ -480,8 +480,8 @@
         <kinematic>0</kinematic>
       </link>
       <plugin name='gazebo_ros2_control' filename='libgazebo_ros2_control.so'>
-        <parameters>/home/jcrex/uji/teams-robotics/astic/prueba/asti2024/retos_ws/install/articubot_one/share/articubot_one/config/my_controllers.yaml</parameters>
-        <parameters>/home/jcrex/uji/teams-robotics/astic/prueba/asti2024/retos_ws/install/articubot_one/share/articubot_one/config/gaz_ros2_ctl_use_sim.yaml</parameters>
+        <parameters>./install/simulador_gazebo/share/simulador_gazebo/config/my_controllers.yaml</parameters>
+        <parameters>./install/simulador_gazebo/share/simulador_gazebo/config/gaz_ros2_ctl_use_sim.yaml</parameters>
       </plugin>
       <frame name='base_footprint_joint' attached_to='base_link'>
         <pose>0 0 0 0 -0 0</pose>
