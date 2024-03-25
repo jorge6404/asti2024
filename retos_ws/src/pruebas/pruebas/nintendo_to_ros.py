@@ -24,7 +24,7 @@ class Button_publisher(Node):
         self.publisher_camera_ = self.create_publisher(JointTrajectory, '/set_joint_trajectory', 10)
         self.publisher_camera_
         self.publisher_
-        timer_period = 0.001  # seconds
+        timer_period = 0.000001  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
         
@@ -40,7 +40,10 @@ class Button_publisher(Node):
         
         self.port = '8888'
         
+        self.count = 0
+        
     def timer_callback(self):
+        
         self.run()
     
     def publish_camera_tilt_angle(self, angle):
@@ -81,6 +84,8 @@ class Button_publisher(Node):
         try:
             # Leer la salida línea por línea
             for linea in proceso.stdout:
+                self.count += 0.000001
+                print(self.count)
                 # Decodificar la línea a UTF-8
                 linea_decodificada = linea.decode('utf-8').strip()
                 linea = linea_decodificada.split(' ')
