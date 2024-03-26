@@ -64,9 +64,9 @@ class ImageSubscriber(Node):
             if text in self.chars:
                 self.mov.detener()
                 self.mov.avanzar()
-                time.sleep(1)
-
-            self.girar_hasta_centro((tl[0], tl[1], br[0], br[1]), wImg)
+                time.sleep(10)
+            else:
+                self.girar_hasta_centro((tl[0], tl[1], br[0], br[1]), wImg)
 
             cv2.waitKey(1)
 
@@ -90,7 +90,7 @@ class ImageSubscriber(Node):
 
         # 4. Calcular los grados que el robot necesita girar
         # Esto es solo un ejemplo, puedes necesitar ajustar la fórmula para que se ajuste a tus necesidades
-        degrees = abs(box_center - center_column) / image_width * 360
+        degrees = abs(box_center - center_column) / image_width * 90
 
         # 5. Llamar a la función `movements.girar_grados(degrees, direccion)` con los grados y la dirección calculados
 

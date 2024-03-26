@@ -86,14 +86,14 @@
       <elevation>0</elevation>
       <heading_deg>0</heading_deg>
     </spherical_coordinates>
-    <model name='Marker13'>
+    <model name='Estrella_azul'>
       <static>1</static>
       <link name='link'>
         <visual name='visual'>
           <geometry>
             <mesh>
-              <uri>model://cuadricula_buena/meshes/Marker13.dae</uri>
-              <scale>1 10 7</scale>
+              <uri>model://Estrella_azul/meshes/Marker4.dae</uri>
+              <scale>4 4 4</scale>
             </mesh>
           </geometry>
         </visual>
@@ -101,18 +101,72 @@
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
       </link>
-      <pose>-0.023723 -0.112278 0 0 -0 0</pose>
+      <pose>-0.037303 -0.970547 0 0 -0 0</pose>
+    </model>
+    <model name='estrella_naranja'>
+      <static>1</static>
+      <link name='link'>
+        <visual name='visual'>
+          <geometry>
+            <mesh>
+              <uri>model://estrella_naranja/meshes/Marker5.dae</uri>
+              <scale>4 4 4</scale>
+            </mesh>
+          </geometry>
+        </visual>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose>-0.037179 1.01125 0 0 -0 0</pose>
+    </model>
+    <model name='formas_geometricas'>
+      <static>1</static>
+      <link name='link'>
+        <visual name='visual'>
+          <geometry>
+            <mesh>
+              <uri>model://formas_geometricas/meshes/Marker1.dae</uri>
+              <scale>1 10 10</scale>
+            </mesh>
+          </geometry>
+        </visual>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose>0.624061 -3.81821 0 0 -0 0</pose>
     </model>
     <state world_name='default'>
-      <sim_time>173 967000000</sim_time>
-      <real_time>174 228868461</real_time>
-      <wall_time>1711287606 327966071</wall_time>
-      <iterations>173967</iterations>
-      <model name='Marker13'>
-        <pose>-0.023723 -0.112278 0 0 -1.56444 0</pose>
+      <sim_time>216 590000000</sim_time>
+      <real_time>216 957041853</real_time>
+      <wall_time>1711394344 24488658</wall_time>
+      <iterations>216590</iterations>
+      <model name='Estrella_azul'>
+        <pose>-0.037464 -0.970547 0.018304 3.14159 -1.56199 3.14159</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose>-0.023723 -0.112278 0 0 -1.56444 0</pose>
+          <pose>-0.037464 -0.970547 0.018304 3.14159 -1.56199 3.14159</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='estrella_naranja'>
+        <pose>-0.037346 1.01125 0.020512 3.14159 -1.56265 3.14159</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>-0.037346 1.01125 0.020512 3.14159 -1.56265 3.14159</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='formas_geometricas'>
+        <pose>0.049654 -4.53163 0.013549 0 -1.56859 0</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>0.049654 -4.53163 0.013549 0 -1.56859 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -134,7 +188,7 @@
     </state>
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose>4.52077 -5.69596 1.25053 0 0.263643 2.3122</pose>
+        <pose>0.20053 -1.14604 12.6232 0 1.4098 -3.10699</pose>
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>
