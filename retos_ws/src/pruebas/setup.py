@@ -23,8 +23,10 @@ setup(
             'test_vision_gazebo = pruebas.test_vision_gazebo:main',
             'detect_text_pub = pruebas.detect_text_pub:main',
             'detect_text_sub = pruebas.detect_text_sub:main',
+            'detect_text_sub_easyocr = pruebas.detect_text_sub_easyocr:main',
             'distance_sensor = pruebas.distance_sensor:main',
             'nintendo_to_ros = pruebas.nintendo_to_ros:main',
+            'prueba_tcpdump = pruebas.prueba_tcpdump:main',
             'nintendo_to_ros2 = pruebas.nintendo_to_ros2:main',
             'prueba_tcpdump = pruebas.prueba_tcpdump:main'
         ],

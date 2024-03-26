@@ -1,0 +1,15 @@
+<?xml version="1.0" ?><sdf version="1.6">
+  <model name="Estrella_azul">
+    <static>true</static>
+    <link name="link">
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://Estrella_azul/meshes/Marker4.dae</uri>
+            <scale>4.0 4.0 4.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+  </model>
+</sdf>

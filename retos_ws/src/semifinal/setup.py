@@ -30,6 +30,7 @@ setup(
             'camara_sub = semifinal.camara_sub:main',
             'siguelineas_sim = semifinal.siguelineas_sim:main',
             'new_siguelineas = semifinal.new_siguelineas_puntos:main',
+            'detect_text_sub_easyocr = pruebas.detect_text_sub_easyocr:main'
         ],
     },
 )

@@ -86,11 +86,38 @@
       <elevation>0</elevation>
       <heading_deg>0</heading_deg>
     </spherical_coordinates>
+    <model name='Marker13'>
+      <static>1</static>
+      <link name='link'>
+        <visual name='visual'>
+          <geometry>
+            <mesh>
+              <uri>model://cuadricula_buena/meshes/Marker13.dae</uri>
+              <scale>1 10 7</scale>
+            </mesh>
+          </geometry>
+        </visual>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose>-0.023723 -0.112278 0 0 -0 0</pose>
+    </model>
     <state world_name='default'>
-      <sim_time>116 912000000</sim_time>
-      <real_time>117 160706850</real_time>
-      <wall_time>1711217705 935345204</wall_time>
-      <iterations>116912</iterations>
+      <sim_time>173 967000000</sim_time>
+      <real_time>174 228868461</real_time>
+      <wall_time>1711287606 327966071</wall_time>
+      <iterations>173967</iterations>
+      <model name='Marker13'>
+        <pose>-0.023723 -0.112278 0 0 -1.56444 0</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>-0.023723 -0.112278 0 0 -1.56444 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
       <model name='ground_plane'>
         <pose>0 0 0 0 -0 0</pose>
         <scale>1 1 1</scale>
@@ -107,7 +134,7 @@
     </state>
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose>1.24894 0.341612 7.28984 -0 1.19964 -3.06299</pose>
+        <pose>4.52077 -5.69596 1.25053 0 0.263643 2.3122</pose>
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>
