@@ -41,11 +41,7 @@ ament_target_dependencies(motor_vel_controller
   std_msgs
 )
 
-add_executable(keyboard_teleop src/keyboard_teleop.cpp)
-ament_target_dependencies(keyboard_teleop rclcpp custom_interfaces)
-
 install(TARGETS
-  keyboard_teleop
   motor_vel_controller
   DESTINATION lib/${PROJECT_NAME}
 )

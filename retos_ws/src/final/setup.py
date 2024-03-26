@@ -20,9 +20,12 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'rosbag = final.rosbag:main',
+            'keyboard_teleop = final.keyboard_teleop:main',
             'dibuja_figura = final.dibuja_figura:main',
             'siguelineas_sim = final.siguelineas_sim:main',
-            'siguelineas_matriz = final.siguelineas_matriz:main'
+            'siguelineas_matriz = final.siguelineas_matriz:main',
+            'bolos = final.bolos:main',
         ],
     },
 )

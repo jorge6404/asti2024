@@ -2,16 +2,46 @@
 
 ## ¿Cómo ejecutar un programa ya hecho en el CyberCrex o en el portátil?
 
+### Pequeño tutorial de WIFI en la raspberry
+
+- /etc/netplan/01-network-manager-all.yaml
+  - La configuración de la red wifi está en este archivo.
+  - Esta permite que se conecten automaticamente a la red wifi que se quiera. Si no se pone aquí, se tendría que usar una pantalla externa, iniciar sesión... De esta forma se puede conectar a la red wifi deseada sin necesidad de hacer nada en la raspberry, ni siquiera iniciar sesión.
+  - Para cambiar esta configuración, habrá que conectarse a una pantalla, o entrar desde un wifi ya agregado
+
+- Escribir wifis en el archivo de configuración de la red wifi, el nuestro está así:
+
+```yaml
+network:
+  version: 2
+  renderer: NetworkManager
+  wifis:
+    wlan0:
+      optional: true
+      access-points:
+        "ego":    # Nombre de la red
+          password: "lo_que_toque"  # Contraseña
+        "PIROBOTNET": {}    # No necesita contraseña, es abierto
+        # etc... poner todos los que haga falta
+      dhcp4: true
+```
+
+- Aplicar los cambios:
+  - `sudo netplan apply`
+
+
+
 ### Opción 100% Raspberry Pi
 
 1. Conectar raspberry a la corriente / batería.
 2. Entrar en la raspberry con ssh desde otro portátil conectado a la misma red wifi.
-  - `ssh -X pi@192.168.0.114` (Contraseña: qwerty)
+  - `ssh -X pi@192.168.245.104`           (`ssh -X pi@192.168.0.114` antes era este pero ya no)
+  - Contraseña: `qwerty`
   - La red wifi puede ser el router PIROBOTNET o los datos de cualquier móvil ya configurado.
   - Para conectarlo a los datos de un móvil o red no configurada, habría que hacerlo desde la interfaz gráfica de la raspberry, conectando un teclado, ratón y monitor... O conectando cable ethernet.
 
 3. Sources.
-  - `cd asti2024/retos_ws`
+  - `cd Documents/asti2024/retos_ws`
   - `source install/setup.bash`  (O usar el alias `src` para hacerlo más rápido)
 
 4. Ejecutar el programa deseado.
@@ -27,11 +57,12 @@
     - `colcon build --packages-select dynamixel_sdk`
     - `source install/setup.bash`
     - `colcon build --symlink-install --packages-select bringup`
+    - Compilar los programas restantes (final...)
     - `source install/setup.bash`
   - Si sigue sin funcionar
     - `sudo usermod -aG dialout pi`
     - `sudo chmod 777 /dev/ttyUSB0`  (o el puerto que sea, podría ser ttyUSB1, ttyUSB2, etc. Usar `ls /dev/ttyUSB*` para verlo)
-    - Reiniciar la controladora de motores.
+    - Reiniciar la controladora de motores. Conectar USB + energia.
     - Cambiar el usb de sitio.
 
 6. Para cerrar la raspberry:

@@ -77,7 +77,7 @@ class Movements(Node):
         self.wheel_publisher_.publish(msg)
         
         self.last_vel = (vel_x, vel_y)
-        self.show_current_vel()
+        # self.show_current_vel()       # Comentar si no se quiere mostrar la velocidad actual
 
     def show_current_vel(self):
         self.get_logger().info(f'Current velocity: {self.last_vel}')
@@ -100,7 +100,7 @@ class Movements(Node):
     
     def herramienta_girar(self, grados):
         msg = SetPosition()
-        msg.position = grados
+        msg.position = int(grados)
         msg.id = self.tool_id
         self.tool_publisher_.publish(msg)
         
@@ -179,31 +179,51 @@ class Movements(Node):
     # ║ FUNCIONES POR DISTANCIAS, RADIOS O GRADOS ║
     # ╚═══════════════════════════════════════════╝
     
-    def avanzar_distancia(self, distancia):
+    def avanzar_distancia(self, distancia, aceleracion=True):
         # Con aceleración
         vel_linear = 0.0
         while(distancia >= 0):
-            if (vel_linear < self.max_linear_vel):
-                vel_linear += self.linear_acc
+            if aceleracion:
+                if (vel_linear < self.max_linear_vel):
+                    vel_linear += self.linear_acc
+            else:
+                vel_linear = self.max_linear_vel
             self.publish_wheel_velocity(vel_linear, 0.0)
             time.sleep(0.1)
             distancia_recorrida = vel_linear*0.1
             distancia -= distancia_recorrida
         self.detener()
 
-    def retroceder_distancia(self, distancia):
+    def retroceder_distancia(self, distancia, aceleracion=True):
         # Con aceleración
         vel_linear = 0.0
         while(distancia >= 0):
-            if (vel_linear < self.max_linear_vel):
-                vel_linear += self.linear_acc
+            if aceleracion:
+                if (vel_linear < self.max_linear_vel):
+                    vel_linear += self.linear_acc
+            else:
+                vel_linear = self.max_linear_vel
             self.publish_wheel_velocity(-vel_linear, 0.0)
             time.sleep(0.1)
             distancia_recorrida = vel_linear*0.1
             distancia -= distancia_recorrida
         self.detener()
 
-    def girar_grados(self, degrees, direccion, radio=0.0):
+
+    def girar_grados_izq(self, degrees, radio=0.0):
+        self.girar_grados(degrees, 'izq', radio)
+        
+    def girar_grados_der(self, degrees, radio=0.0):
+        self.girar_grados(degrees, 'der', radio)
+        
+    def girar_grados_izq_atras(self, degrees, radio=0.0):
+        # TODO: Testear
+        self.girar_grados(degrees, 'izq', radio, palante=False)
+
+    def girar_grados_der_atras(self, degrees, radio=0.0):
+        self.girar_grados(degrees, 'der', radio, palante=False)
+
+    def girar_grados(self, degrees, direccion, radio=0.0, palante=True):
         # TODO: Testear que está bien, ya que no lo he probado
         
         """Rotar el robot en un angulo determinado
@@ -222,7 +242,11 @@ class Movements(Node):
         else:
             direccion = -1
         
-        vel_lin = self.max_linear_vel
+        if palante:
+            vel_lin = self.max_linear_vel
+        else:
+            vel_lin = -self.max_linear_vel
+        
         vel_ang = 0.0
 
         max_ang = self.max_angular_vel
@@ -260,18 +284,11 @@ class Movements(Node):
             angular_vel = float(vel_lin/radian_total*10)        # ???
             
             while(radian_total >= 0.0):
-                print("Angular velocity: ", angular_vel)
-                
                 self.publish_wheel_velocity(vel_lin, angular_vel*direccion)
                 
                 time.sleep(0.1)
                 radian_recorridos = angular_vel * 0.1
-                radian_total -= radian_recorridos
+                radian_total -= abs(radian_recorridos)
 
             self.detener()
 
-    def girar_grados_izq(self, degrees, radio=0.0):
-        self.girar_grados(degrees, 'izq', radio)
-        
-    def girar_grados_der(self, degrees, radio=0.0):
-        self.girar_grados(degrees, 'der', radio)
