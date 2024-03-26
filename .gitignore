@@ -9,7 +9,6 @@ venv/
 .vscode/
 .vscode/settings.json
 __pycache__/
-*.cfg
 Otros/siguelinea/siguelinea/__init__.py
 Otros/siguelinea/test/test_copyright.py
 Otros/siguelinea/test/test_flake8.py
