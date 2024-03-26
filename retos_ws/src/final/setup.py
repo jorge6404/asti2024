@@ -26,6 +26,7 @@ setup(
             'siguelineas_sim = final.siguelineas_sim:main',
             'siguelineas_matriz = final.siguelineas_matriz:main',
             'bolos = final.bolos:main',
+            'cuadricula = final.cuadricula:main',
         ],
     },
 )
