@@ -2,6 +2,35 @@
 
 ## ¿Cómo ejecutar un programa ya hecho en el CyberCrex o en el portátil?
 
+### Pequeño tutorial de WIFI en la raspberry
+
+- /etc/netplan/01-network-manager-all.yaml
+  - La configuración de la red wifi está en este archivo.
+  - Esta permite que se conecten automaticamente a la red wifi que se quiera. Si no se pone aquí, se tendría que usar una pantalla externa, iniciar sesión... De esta forma se puede conectar a la red wifi deseada sin necesidad de hacer nada en la raspberry, ni siquiera iniciar sesión.
+  - Para cambiar esta configuración, habrá que conectarse a una pantalla, o entrar desde un wifi ya agregado
+
+- Escribir wifis en el archivo de configuración de la red wifi, el nuestro está así:
+
+```yaml
+network:
+  version: 2
+  renderer: NetworkManager
+  wifis:
+    wlan0:
+      optional: true
+      access-points:
+        "ego":    # Nombre de la red
+          password: "lo_que_toque"  # Contraseña
+        "PIROBOTNET": {}    # No necesita contraseña, es abierto
+        # etc... poner todos los que haga falta
+      dhcp4: true
+```
+
+- Aplicar los cambios:
+  - `sudo netplan apply`
+
+
+
 ### Opción 100% Raspberry Pi
 
 1. Conectar raspberry a la corriente / batería.
@@ -11,7 +40,7 @@
   - Para conectarlo a los datos de un móvil o red no configurada, habría que hacerlo desde la interfaz gráfica de la raspberry, conectando un teclado, ratón y monitor... O conectando cable ethernet.
 
 3. Sources.
-  - `cd asti2024/retos_ws`
+  - `cd Documents/asti2024/retos_ws`
   - `source install/setup.bash`  (O usar el alias `src` para hacerlo más rápido)
 
 4. Ejecutar el programa deseado.
