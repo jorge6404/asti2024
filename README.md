@@ -35,7 +35,8 @@ network:
 
 1. Conectar raspberry a la corriente / batería.
 2. Entrar en la raspberry con ssh desde otro portátil conectado a la misma red wifi.
-  - `ssh -X pi@192.168.0.114` (Contraseña: qwerty)
+  - `ssh -X pi@192.168.245.104`           (`ssh -X pi@192.168.0.114` antes era este pero ya no)
+  - Contraseña: `qwerty`
   - La red wifi puede ser el router PIROBOTNET o los datos de cualquier móvil ya configurado.
   - Para conectarlo a los datos de un móvil o red no configurada, habría que hacerlo desde la interfaz gráfica de la raspberry, conectando un teclado, ratón y monitor... O conectando cable ethernet.
 
@@ -56,11 +57,12 @@ network:
     - `colcon build --packages-select dynamixel_sdk`
     - `source install/setup.bash`
     - `colcon build --symlink-install --packages-select bringup`
+    - Compilar los programas restantes (final...)
     - `source install/setup.bash`
   - Si sigue sin funcionar
     - `sudo usermod -aG dialout pi`
     - `sudo chmod 777 /dev/ttyUSB0`  (o el puerto que sea, podría ser ttyUSB1, ttyUSB2, etc. Usar `ls /dev/ttyUSB*` para verlo)
-    - Reiniciar la controladora de motores.
+    - Reiniciar la controladora de motores. Conectar USB + energia.
     - Cambiar el usb de sitio.
 
 6. Para cerrar la raspberry:
