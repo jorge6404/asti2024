@@ -1,0 +1,15 @@
+<?xml version="1.0" ?><sdf version="1.5">
+  <model name="imagen_cuadricula">
+    <static>true</static>
+    <link name="link">
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://imagen_cuadricula/meshes/imagen_cuadricula.dae</uri>
+            <scale>4.0 4.0 4.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+  </model>
+</sdf>

@@ -37,3 +37,8 @@
    ### Busca la siguiente linea en el archivo xacro, y comprueba que el nombre del paquete sea el correcto:
     - `<parameters>$(find simulador_gazebo)/config/my_controllers.yaml</parameters>`
     - `<parameters>$(find simulador_gazebo)/config/gaz_ros2_ctl_use_sim.yaml</parameters>`
+
+3. Si el programa gazebo se queda pegado:
+    - `Ctrl + C` para cerrar el programa.
+    - Ve a la carpeta `~/.gazebo` y elimina la carpeta `models`.
+    - Luego cambiala por la carpeta 'models' que esta en `simulador_gazebo/solo_modifica_gazebo`.
