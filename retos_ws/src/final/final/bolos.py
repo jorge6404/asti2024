@@ -1,6 +1,6 @@
 import rclpy
 from rclpy.node import Node
-from .Movements import Movements
+from final.Movements import Movements
 
 # TODO: Configuración de velocidades, poder cambiar entre rondas para así ajustarlo a la mejor puntuación posible.
 
