@@ -16,7 +16,9 @@
 //
 //             * Send Twist messages to /cmd_vel topic *
 // >> ros2 topic pub -1 /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.2, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.1}}"
-//
+// 
+//            * Send SetPosition messages to /tool_pos topic *
+// >> ros2 topic pub -1 /tool_pos custom_interfaces/msg/SetPosition "{position: 90, id: 3}"
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <cstdio> // Dynamixel SDK
