@@ -108,6 +108,8 @@ def main(args=None):
         print("ERROR OPCION")
         return
     
+    
+    saver.mover.detener()
     rclpy.shutdown()
 
 if __name__ == '__main__':

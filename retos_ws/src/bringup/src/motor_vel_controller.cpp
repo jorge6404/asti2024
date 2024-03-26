@@ -65,8 +65,8 @@ constexpr double pi = 3.141592653589793;
 // Variables for motor control
 uint8_t id_herramienta = 3;
 uint32_t goal_position = 0;
-uint32_t right_wheel_velocity = 0;
-uint32_t left_wheel_velocity = 0;
+int32_t right_wheel_velocity = 0;
+int32_t left_wheel_velocity = 0;
 
 // Unit that allows the program to convert desired robot velocity to motor velocity units
 const double distance_unit = 1 / (pi * VELOCITY_UNIT * WHEEL_DIAMETER / 60);

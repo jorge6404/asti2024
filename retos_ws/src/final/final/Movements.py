@@ -51,8 +51,8 @@ class Movements(Node):
         self.tool_publisher_ = self.create_publisher(SetPosition, 'tool_pos', 10)
         
         # WHEELS
-        self.max_linear_vel = 0.3       # TODO: CAMBIAR A VALORES QUE SEAN BUENOS POR DEFECTO
-        self.max_angular_vel = 2.0
+        self.max_linear_vel = 0.1       # TODO: CAMBIAR A VALORES QUE SEAN BUENOS POR DEFECTO
+        self.max_angular_vel = 0.7
         self.linear_acc = 0.01
         self.angular_acc = 0.1
         self.last_vel = (0.0, 0.0)
