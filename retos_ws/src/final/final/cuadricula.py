@@ -40,9 +40,9 @@ def angulo_ojo(mov):
 def calculo_trigonometria(mov):
 
   # INTRODUCIMOS LA DISTANCIA X E Y, ADEMÁS DE LA DIRECCIÓN DE GIRO
-  x = float(input("Introduce la distancia x: "))
-  y = float(input("Introduce la distancia y: "))
-  giro = input("Dirección de giro (izq/der): ")
+  x = float(input("Introduce la distancia x (cm): ")) / 100
+  y = float(input("Introduce la distancia y: (cm) ") / 100)
+  giro = input("Dirección de giro (izq/der) (grados): ")
 
   # CALCULAMOS EL ÁNGULO
   angulo = atan(y/x)
@@ -53,13 +53,16 @@ def calculo_trigonometria(mov):
   distancia = (x**2 + y**2)**0.5
 
   # GIRAMOS EL ROBOT
+  print(f'Girando {angulo_giro} grados')
   if giro == "izq":
     mov.girar_grados_izq(angulo_giro)
   elif giro == "der":
     mov.girar_grados_der(angulo_giro)
 
   # AVANZAMOS LA DISTANCIA
+  print(f'Avanzando {distancia}m')
   mov.avanzar_distancia(distancia)
+  mov.detener()
 
 def ejecutar_cuadricula(mov, opcion_menu):
   if opcion_menu == '1':

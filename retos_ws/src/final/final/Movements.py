@@ -80,8 +80,8 @@ class Movements(Node):
         self.tool_publisher_ = self.create_publisher(SetPosition, 'tool_pos', 10)
         
         # WHEELS
-        self.max_linear_vel = 0.1       # TODO: CAMBIAR A VALORES QUE SEAN BUENOS POR DEFECTO
-        self.max_angular_vel = 0.7
+        self.obj_linear_vel = 0.1       # TODO: CAMBIAR A VALORES QUE SEAN BUENOS POR DEFECTO
+        self.obj_angular_vel = 0.7
         self.linear_acc = 0.01
         self.angular_acc = 0.1
         self.last_vel = (0.0, 0.0)
@@ -112,10 +112,10 @@ class Movements(Node):
         self.get_logger().info(f'Current velocity: {self.last_vel}')
         
     def actualizar_vel_lineal(self, max_linear_vel):
-        self.max_linear_vel = max_linear_vel
+        self.obj_linear_vel = max_linear_vel
     
     def actualizar_vel_angular(self, max_angular_vel):
-        self.max_angular_vel = max_angular_vel
+        self.obj_angular_vel = max_angular_vel
     
     def actualizar_acc_lineal(self, linear_acc):
         self.linear_acc = linear_acc
@@ -163,16 +163,16 @@ class Movements(Node):
     # ╚═════════════════════════════╝
     
     def avanzar(self):
-        self.publish_wheel_velocity(self.max_linear_vel, 0.0)
+        self.publish_wheel_velocity(self.obj_linear_vel, 0.0)
         
     def retroceder(self):
-        self.publish_wheel_velocity(-self.max_linear_vel, 0.0)
+        self.publish_wheel_velocity(-self.obj_linear_vel, 0.0)
         
     def girar_izquierda(self):
-        self.publish_wheel_velocity(0.0, self.max_angular_vel)
+        self.publish_wheel_velocity(0.0, self.obj_angular_vel)
         
     def girar_derecha(self):
-        self.publish_wheel_velocity(0.0, -self.max_angular_vel)
+        self.publish_wheel_velocity(0.0, -self.obj_angular_vel)
         
     def detener(self):
         self.publish_wheel_velocity(0.0, 0.0)
@@ -208,30 +208,30 @@ class Movements(Node):
     # ║ FUNCIONES POR DISTANCIAS, RADIOS O GRADOS ║
     # ╚═══════════════════════════════════════════╝
     
-    def avanzar_distancia(self, distancia, aceleracion=True):
+    def avanzar_distancia(self, distancia, aceleracion=False):
         # Con aceleración
         vel_linear = 0.0
         while(distancia >= 0):
             if aceleracion:
-                if (vel_linear < self.max_linear_vel):
+                if (vel_linear < self.obj_linear_vel):
                     vel_linear += self.linear_acc
             else:
-                vel_linear = self.max_linear_vel
+                vel_linear = self.obj_linear_vel
             self.publish_wheel_velocity(vel_linear, 0.0)
             time.sleep(0.1)
             distancia_recorrida = vel_linear*0.1
             distancia -= distancia_recorrida
         self.detener()
 
-    def retroceder_distancia(self, distancia, aceleracion=True):
+    def retroceder_distancia(self, distancia, aceleracion=False):
         # Con aceleración
         vel_linear = 0.0
         while(distancia >= 0):
             if aceleracion:
-                if (vel_linear < self.max_linear_vel):
+                if (vel_linear < self.obj_linear_vel):
                     vel_linear += self.linear_acc
             else:
-                vel_linear = self.max_linear_vel
+                vel_linear = self.obj_linear_vel
             self.publish_wheel_velocity(-vel_linear, 0.0)
             time.sleep(0.1)
             distancia_recorrida = vel_linear*0.1
@@ -272,13 +272,13 @@ class Movements(Node):
             direccion = -1
         
         if palante:
-            vel_lin = self.max_linear_vel
+            vel_lin = self.obj_linear_vel
         else:
-            vel_lin = -self.max_linear_vel
+            vel_lin = -self.obj_linear_vel
         
         vel_ang = 0.0
 
-        max_ang = self.max_angular_vel
+        max_ang = self.obj_angular_vel
         acc_ang = self.angular_acc
 
 
