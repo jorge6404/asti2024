@@ -40,8 +40,8 @@ def angulo_ojo(mov):
 def calculo_trigonometria(mov):
 
   # INTRODUCIMOS LA DISTANCIA X E Y, ADEMÁS DE LA DIRECCIÓN DE GIRO
-  x = float(input("Introduce la distancia x (cm): ")) / 100
-  y = float(input("Introduce la distancia y: (cm) ")) / 100
+  x = float(input("Introduce la distancia x (cm, la distancia hacia su lado): ")) / 100
+  y = float(input("Introduce la distancia y (cm, lo que le falta avanzar) ")) / 100
   giro = input("Dirección de giro (izq/der) (grados): ")
 
   # CALCULAMOS EL ÁNGULO

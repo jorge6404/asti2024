@@ -309,11 +309,15 @@ class Movements(Node):
         else:
             # TODO: Arreglar esto
             
-            print("Giro con radio")
-            angular_vel = float(vel_lin/radian_total*10)        # ???
+            print("Giro con radio2")
+            angular_vel = float(vel_lin/radio)        # ???
+            print(f'Angular_vel: {angular_vel}')
+            #vel_lin += vel_lin*radio
             
             while(radian_total >= 0.0):
+                print(f'Velocidad publicada: ({vel_lin}, {angular_vel*direccion})')
                 self.publish_wheel_velocity(vel_lin, angular_vel*direccion)
+
                 
                 time.sleep(0.1)
                 radian_recorridos = angular_vel * 0.1

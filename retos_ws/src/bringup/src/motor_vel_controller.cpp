@@ -108,13 +108,20 @@ MotorController::MotorController()
             right_wheel_velocity = linear_velocity * distance_unit;
             left_wheel_velocity = linear_velocity * distance_unit;
          } else {
-            if (angular_velocity > 0) {
+            /*if (angular_velocity > 0) {
                right_wheel_velocity = (angular_velocity * (linear_velocity + WHEEL_SEPARATION / 2)) * distance_unit;
                left_wheel_velocity = (angular_velocity * (linear_velocity - WHEEL_SEPARATION / 2)) * distance_unit;
             } else {
                right_wheel_velocity = (-angular_velocity * (linear_velocity - WHEEL_SEPARATION / 2)) * distance_unit;
                left_wheel_velocity = (-angular_velocity * (linear_velocity + WHEEL_SEPARATION / 2)) * distance_unit;
-            }
+            }*/
+        if (angular_velocity > 0) {
+            right_wheel_velocity = ((2*linear_velocity + WHEEL_SEPARATION*angular_velocity) / 2) * distance_unit;
+               left_wheel_velocity = ((2*linear_velocity - WHEEL_SEPARATION*angular_velocity) / 2) *  distance_unit;
+            } else {
+               right_wheel_velocity = ((2*linear_velocity + WHEEL_SEPARATION*angular_velocity) / 2) * distance_unit;
+               left_wheel_velocity = ((2*linear_velocity - WHEEL_SEPARATION*angular_velocity) / 2) *  distance_unit;
+         }
          }
 
          // Send goal velocity (4 bytes) to each one of the DYNAMIXELs
