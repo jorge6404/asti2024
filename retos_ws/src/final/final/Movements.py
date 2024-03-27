@@ -6,6 +6,35 @@ from geometry_msgs.msg import Twist
 from std_msgs.msg import Float32
 from custom_interfaces.msg import SetPosition
 
+def get_movements():
+    # TODO: Importante mantener actualizado
+    actions = {
+        1: ('avanzar', []),
+        2: ('retroceder', []),
+        3: ('girar_izquierda', []),
+        4: ('girar_derecha', []),
+        5: ('detener', []),
+        6: ('avanzar_distancia', ['distancia', 'aceleracion']),
+        7: ('retroceder_distancia', ['distancia', 'aceleracion']),
+        8: ('girar_grados_izq', ['degrees', 'radio']),
+        9: ('girar_grados_der', ['degrees', 'radio']),
+        10: ('girar_grados_izq_atras', ['degrees', 'radio']),
+        11: ('girar_grados_der_atras', ['degrees', 'radio']),
+        12: ('herramienta_girar', ['grados']),
+        13: ('boli_subir', []),
+        14: ('boli_bajar', []),
+        15: ('bolos_soltar', []),
+        16: ('bolos_mantener', []),
+        17: ('pale_subir', []),
+        18: ('pale_bajar', []),
+        19: ('actualizar_vel_lineal', ['max_linear_vel']),
+        20: ('actualizar_vel_angular', ['max_angular_vel']),
+        21: ('actualizar_acc_lineal', ['linear_acc']),
+        22: ('actualizar_acc_angular', ['angular_acc']),
+        23: ('prueba_movimientos', []),
+    }
+    return actions
+
 class Movements(Node):
     def __init__(self):
         """
