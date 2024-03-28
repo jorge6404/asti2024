@@ -4,10 +4,10 @@
 import rclpy
 import time
 from math import pi
-from .Movements import Movements
+from final.Movements import Movements
 
 SLEEP_TIME_BOLI = 0.5
-SLEEP_TIME_MOVIMIENTO = 0.1
+SLEEP_MOV = 0.1
 
 VELOCIDAD_LINEAL = 0.1
 VELOCIDAD_ANGULAR = 0.5
@@ -42,19 +42,14 @@ def get_figure_params(opcion_menu):
   return angulo, largo, ancho, lados
 
 def pedir_opcion_menu():
-  print("\nFiguras principales")
+  print("\nFiguras:")
   print(" 1. Triangulo")
   print(" 2. Cuadrado")
   print(" 3. Rectangulo")
-  print("\nPruebas:")
-  print(" a. Prueba de movimiento")
-  print(" s. Subir boli")
-  print(" d. Bajar boli")
   print(" q. Salir")
-  
   return input("Seleccione una opcion: ")
 
-def dibujar_figura(mov: Movements, opcion_menu):
+def dibujar_figura(mov:Movements, opcion_menu):
   angulo, largo, ancho, lados = get_figure_params(opcion_menu)
   
   bajar_boli()
@@ -67,34 +62,34 @@ def dibujar_figura(mov: Movements, opcion_menu):
     
     # Move forward
     print("Moviendo hacia adelante")
-    for linear_iterations in range(int(distancia / (abs(VELOCIDAD_LINEAL) * SLEEP_TIME_MOVIMIENTO))):
+    for linear_iterations in range(int(distancia / (abs(VELOCIDAD_LINEAL) * SLEEP_MOV))):
         mov.avanzar()
-        time.sleep(SLEEP_TIME_MOVIMIENTO)
+        time.sleep(SLEEP_MOV)
 
     mov.detener()
-    subir_boli()
+    mov
 
     # Move forward 16cm
     print("Moviendo hacia adelante")
-    for linear_iterations in range(int(0.2 / (abs(VELOCIDAD_LINEAL) * SLEEP_TIME_MOVIMIENTO))):
+    for linear_iterations in range(int(0.2 / (abs(VELOCIDAD_LINEAL) * SLEEP_MOV))):
         mov.avanzar()
-        time.sleep(SLEEP_TIME_MOVIMIENTO)
+        time.sleep(SLEEP_MOV)
 
     mov.detener()
 
     # Turn
     print("Girando")
-    for angular_iterations in range(int(angulo / (abs(VELOCIDAD_ANGULAR) * SLEEP_TIME_MOVIMIENTO))):
+    for angular_iterations in range(int(angulo / (abs(VELOCIDAD_ANGULAR) * SLEEP_MOV))):
         mov.girar_izquierda()
-        time.sleep(SLEEP_TIME_MOVIMIENTO)
+        time.sleep(SLEEP_MOV)
 
     mov.detener()
 
     # Move backward 16cm
     print("Moviendo hacia atras")
-    for linear_iterations in range(int(0.15 / (abs(VELOCIDAD_LINEAL) * SLEEP_TIME_MOVIMIENTO))):
+    for linear_iterations in range(int(0.15 / (abs(VELOCIDAD_LINEAL) * SLEEP_MOV))):
         mov.retroceder()
-        time.sleep(SLEEP_TIME_MOVIMIENTO)
+        time.sleep(SLEEP_MOV)
 
     mov.detener()
     bajar_boli()
@@ -111,17 +106,10 @@ def main():
     opcion_menu = pedir_opcion_menu()
     
     # Testeos
-    if opcion_menu == 'a':
-      mov.prueba_movimientos()
-    elif opcion_menu == 's':
-      subir_boli()
-    elif opcion_menu == 'd':
-      bajar_boli()
+    if opcion_menu in ['1', '2', '3']:  # Triangulo, cuadrado, rectangulo
+      dibujar_figura(mov, opcion_menu)
     elif opcion_menu == 'q':
       break
-    # Dibujar figura
-    elif opcion_menu in ['1', '2', '3']:  # Triangulo, cuadrado, rectangulo
-      dibujar_figura(mov, opcion_menu)
     else:
       print("Opcion no valida, 'q' para salir")
 

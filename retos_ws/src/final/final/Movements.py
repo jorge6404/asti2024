@@ -240,88 +240,59 @@ class Movements(Node):
 
 
     def girar_grados_izq(self, degrees, radio=0.0):
-        self.girar_grados(degrees, 'izq', radio)
+        self.girar_grados(degrees, radio)
         
     def girar_grados_der(self, degrees, radio=0.0):
-        self.girar_grados(degrees, 'der', radio)
+        self.girar_grados(-degrees, radio)
         
     def girar_grados_izq_atras(self, degrees, radio=0.0):
-        # TODO: Testear
-        self.girar_grados(degrees, 'izq', radio, palante=False)
+        self.girar_grados(degrees, radio, avanzar=False)
 
     def girar_grados_der_atras(self, degrees, radio=0.0):
-        self.girar_grados(degrees, 'der', radio, palante=False)
+        self.girar_grados(-degrees, radio, avanzar=False)
 
-    def girar_grados(self, degrees, direccion, radio=0.0, palante=True):
+
+    def girar_grados(self, degrees, radio=0.0, avanzar=True):
         # TODO: Testear que está bien, ya que no lo he probado
-        
         """Rotar el robot en un angulo determinado
-
         Args:
-            degrees (int): Grados a rotar (en decimal) (Siempre se convertirá en positivo)
-            direccion (str): 'izq' o 'der'
-            radio (float, optional): Si se quiere realizar el movimiento con un radio. Defaults to 0.0.
-            config (dict, optional): Configuración adicional sobre velocidades. Defaults to {'max_linear': 0.3, 'max_angular': 2, 'acc_linear': 0.01, 'acc_angular': 0.1}.
+            degrees (int): Grados a rotar (en decimal), izquierda+ o derecha-
+            radio (float, optional): Si se quiere realizar el movimiento con un radio. Defaults to 0.0
+            avanzar (bool, optional): Si se quiere que el giro se haga avanzando o retrocediendo. Defaults to True.
         """
+        if degrees == 0:
+            return
         
-        # DATOS
-        radian_total = abs(degrees)*math.pi/180
-        if direccion == 'izq':
-            direccion = 1         # todo: Está bien?
-        else:
-            direccion = -1
+        # Grados -> Radianes
+        radian = abs(degrees*math.pi/180)
         
-        if palante:
-            vel_lin = self.obj_linear_vel
-        else:
-            vel_lin = -self.obj_linear_vel
-        
-        vel_ang = 0.0
-
-        max_ang = self.obj_angular_vel
-        acc_ang = self.angular_acc
-
-
-        # GIRO SOBRE SÍ MISMO (velocidad lineal = 0.0)
-        
-        # --- CON ACELERACIÓN ---      # TODO: No funcionaba bien
-        # if radio == 0.0:
-        #     while(radian_total >= 0):
-        #         if (vel_ang < max_ang):
-        #             vel_ang += acc_ang
-        #         self.publish_wheel_velocity(0.0, vel_ang*direccion)
-        #         time.sleep(0.1)
-        #         grados_recorridos = vel_ang*0.1
-        #         radian_total -= grados_recorridos
-        #     self.detener()
-        
-        # --- SIN ACELERACIÓN ---
+        # Determinar velocidades lineal y angular
+        vel_lin = self.obj_linear_vel if avanzar else -self.obj_linear_vel
         if radio == 0.0:
-            while(radian_total >= 0):
-                self.publish_wheel_velocity(0.0, max_ang*direccion)
-                time.sleep(0.1)
-                grados_recorridos = max_ang*0.1
-                radian_total -= grados_recorridos
-            self.detener()
-
-
-        # GIRO CON RADIO (velocidad lineal != 0.0)
+            ang_vel = self.obj_angular_vel
         else:
-            # TODO: Arreglar esto
-            
-            print("Giro con radio2")
-            angular_vel = float(vel_lin/radio)        # ???
-            print(f'Angular_vel: {angular_vel}')
-            #vel_lin += vel_lin*radio
-            
-            while(radian_total >= 0.0):
-                print(f'Velocidad publicada: ({vel_lin}, {angular_vel*direccion})')
-                self.publish_wheel_velocity(vel_lin, angular_vel*direccion)
+            ang_vel = vel_lin/radio
+        
+        # Sentido de giro?
+        if degrees < 0:
+            ang_vel *= -1
+        else:
+            ang_vel *= 1
+        
+        # MOVIMIENTO
+        radians_done = 0.0
+        '''start_time = time.time()'''
 
-                
-                time.sleep(0.1)
-                radian_recorridos = angular_vel * 0.1
-                radian_total -= abs(radian_recorridos)
-
-            self.detener()
-
+        while radians_done < radian:
+            self.publish_wheel_velocity(vel_lin, ang_vel)
+            time.sleep(0.1)
+            radian_increment = abs(ang_vel) * 0.1
+            radians_done += radian_increment
+            '''
+            current_time = time.time()
+            elapsed = current_time - start_time
+            radians_done = abs(ang_vel) * elapsed
+            '''
+            # TODO: Odometria para saber cuánto ha girado??
+        
+        self.detener()
